@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/logo.png" alt="PromptBridge Logo" width="120" style="border-radius: 20px; margin-bottom: 20px;" />
+
 # 🌉 PromptBridge
 
 **Multi-platform AI agent orchestrator**
@@ -19,8 +21,8 @@ Drive **Claude Code** and **Cursor** agents from **Telegram**, **Email**, or any
 
 PromptBridge lets you control AI coding agents from anywhere — your phone, your inbox, or a browser. Send a prompt via Telegram or email, and get a full agent-powered response with file attachments, git diffs, and generated artifacts delivered back to you automatically.
 
-```
-You (Telegram / Email)
+<div align="center">
+<pre><code>You (Telegram / Email)
         │
         ▼
   PromptBridge
@@ -39,7 +41,8 @@ You (Telegram / Email)
         │                 │
    Claude Code         Cursor
     (claude CLI)   (cursor-agent CLI)
-```
+</code></pre>
+</div>
 
 ---
 

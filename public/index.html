@@ -4,710 +4,342 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PromptBridge Dashboard</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      background: #0f1116; color: #e8e8ea; margin: 0; padding: 24px;
-      max-width: 1100px; margin-left: auto; margin-right: auto;
-    }
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
-    h1 { margin: 0; font-size: 22px; }
-    h1 span { color: #4d7cff; }
-    h2 { margin: 0 0 16px; font-size: 15px; color: #a8a8b3; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    h3 { margin: 24px 0 12px; font-size: 13px; color: #8a8a95; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-top: 1px solid #262a33; padding-top: 16px; }
-    h3:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
-    .card { background: #1a1d24; border: 1px solid #262a33; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #262a33; font-size: 14px; vertical-align: top; }
-    th { color: #8a8a95; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-    tr:last-child td { border-bottom: none; }
-    code { background: #0f1116; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #b8d4ff; word-break: break-all; }
-    label { display: block; margin: 12px 0 4px; font-size: 13px; color: #a8a8b3; }
-    input, select, textarea {
-      width: 100%; padding: 10px 12px; background: #0f1116; border: 1px solid #2e323d;
-      color: #e8e8ea; border-radius: 6px; font-family: inherit; font-size: 14px;
-    }
-    input[type="checkbox"] { width: auto; margin-right: 8px; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #4d7cff; }
-    textarea { min-height: 100px; resize: vertical; font-family: ui-monospace, "SF Mono", Consolas, monospace; }
-    button {
-      padding: 9px 16px; background: #4d7cff; color: white; border: none; border-radius: 6px;
-      cursor: pointer; font-size: 14px; font-weight: 500;
-    }
-    button:hover { background: #3d6cef; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    button.danger { background: transparent; color: #f08080; border: 1px solid #5a2a2a; }
-    button.danger:hover { background: #2a1a1a; }
-    button.ghost { background: transparent; border: 1px solid #2e323d; color: #e8e8ea; }
-    button.ghost:hover { border-color: #4d7cff; }
-    button.success { background: #1e4d2b; color: #8fe29d; border: 1px solid #2a6b3a; }
-    button.success:hover { background: #255a33; }
-    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .pill { display: inline-block; padding: 3px 10px; background: #262a33; border-radius: 12px; font-size: 12px; color: #b8d4ff; }
-    .pill.ok { background: #15321d; color: #8fe29d; }
-    .pill.warn { background: #3a2615; color: #f0b070; }
-    .empty { color: #6a6a75; padding: 32px; text-align: center; }
-    .help { color: #6a6a75; font-size: 12px; margin-top: 4px; }
-    .toast {
-      position: fixed; bottom: 24px; right: 24px; padding: 12px 16px;
-      background: #1a1d24; border: 1px solid #4d7cff; border-radius: 6px;
-      transform: translateY(100px); transition: transform 0.2s; opacity: 0; z-index: 100; max-width: 360px;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.error { border-color: #c14040; }
-    .toast.ok { border-color: #2a6b3a; }
-    .status-bar { display: flex; gap: 16px; font-size: 12px; color: #8a8a95; flex-wrap: wrap; }
-    .status-bar .kv { display: inline-flex; gap: 4px; }
-    .status-bar .kv b { color: #e8e8ea; font-weight: 500; }
-    .tabs { display: flex; gap: 2px; margin-bottom: 16px; border-bottom: 1px solid #262a33; flex-wrap: wrap; }
-    .tab { padding: 10px 16px; cursor: pointer; color: #8a8a95; border-bottom: 2px solid transparent; font-size: 14px; }
-    .tab.active { color: #e8e8ea; border-bottom-color: #4d7cff; }
-    .panel { display: none; }
-    .panel.active { display: block; }
-    .auth-banner { background: #2a1e10; border: 1px solid #5a3a15; color: #f0b070; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
-    .auth-banner input { margin-top: 8px; max-width: 420px; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
-    .result-box {
-      background: #0f1116; border: 1px solid #262a33; border-radius: 6px;
-      padding: 12px; font-size: 13px; color: #8fe29d; margin-top: 12px;
-      display: none; white-space: pre-wrap; word-break: break-word;
-    }
-    .result-box.show { display: block; }
-    .result-box.error { color: #f08080; }
-    .toggle-row { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; }
-    .toggle-row label { margin: 0; }
-  </style>
+  
+  <!-- Modern Fonts and Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/logo.png">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="/app.css">
 </head>
 <body>
-  <header>
-    <h1><span>Prompt</span>Bridge</h1>
-    <div class="status-bar" id="status"></div>
-  </header>
-
-  <div id="auth" class="auth-banner" style="display:none;">
-    <div><strong>Authentication required.</strong> Enter your dashboard token.</div>
-    <div class="row" style="margin-top: 10px;">
-      <input id="token-input" type="password" placeholder="Dashboard token" style="flex:1;">
-      <button id="token-save">Authenticate</button>
+  
+  <div id="sidebar">
+    <div class="brand">
+      <img src="/logo.png" alt="PromptBridge Logo"> PromptBridge
+    </div>
+    
+    <div class="nav-menu">
+      <div class="nav-item active" data-tab="projects">
+        <i data-lucide="layout-grid"></i> Projects
+      </div>
+      <div class="nav-item" data-tab="email-run">
+        <i data-lucide="mail"></i> Email Run
+      </div>
+      <div class="nav-item" data-tab="sessions">
+        <i data-lucide="message-square"></i> Sessions
+      </div>
+      <div class="nav-item" data-tab="settings">
+        <i data-lucide="settings"></i> Settings
+      </div>
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="projects">Projects</div>
-    <div class="tab" data-tab="email-run">Email Run</div>
-    <div class="tab" data-tab="sessions">Sessions</div>
-    <div class="tab" data-tab="settings">Settings</div>
-  </div>
+  <div class="main-wrapper">
+    
+    <header id="topbar">
+      <div class="row">
+        <button class="mobile-menu-btn" id="mobile-menu-toggle">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+      <div class="status-bar" id="status">
+        <!-- Status rendered here -->
+      </div>
+    </header>
 
-  <!-- ── Projects ─────────────────────────────────────────────── -->
-  <div id="panel-projects" class="panel active">
-    <div class="card">
-      <h2>Configured Projects</h2>
-      <table id="projects-table"></table>
-    </div>
-    <div class="card">
-      <h2 id="form-title">Add Project</h2>
-      <form id="project-form">
-        <input type="hidden" id="id">
-        <label for="name">Project Name</label>
-        <input id="name" required placeholder="my-app" autocomplete="off">
+    <div class="content-area">
+      <div class="content-container">
 
-        <label for="cwd">Working Directory</label>
-        <input id="cwd" required placeholder="D:/Personal/my-app" autocomplete="off">
-        <div class="help">The agent is locked to this directory.</div>
-
-        <label for="agent">Default Agent</label>
-        <select id="agent">
-          <option value="claude">Claude Code</option>
-          <option value="cursor">Cursor Agent</option>
-        </select>
-
-        <label for="model">Model <span style="color:#6a6a75;">(optional)</span></label>
-        <input id="model" list="model-presets" autocomplete="off" placeholder="e.g. opus, sonnet, haiku, claude-opus-4-7">
-        <datalist id="model-presets"></datalist>
-
-        <label for="systemPrompt">System Prompt <span style="color:#6a6a75;">(optional)</span></label>
-        <textarea id="systemPrompt" placeholder="Always read existing code before editing…"></textarea>
-        <div class="help">Project name + working directory are injected automatically.</div>
-
-        <div class="row" style="margin-top: 16px;">
-          <button type="submit" id="save-btn">Save Project</button>
-          <button type="button" class="ghost" id="cancel">Reset Form</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ── Email Run ─────────────────────────────────────────────── -->
-  <div id="panel-email-run" class="panel">
-    <div class="card">
-      <h2>Run Agent &amp; Email Response</h2>
-      <p style="font-size:13px;color:#8a8a95;margin:0 0 16px">Trigger an agent run from the dashboard and receive the full response by email. Configure SMTP in the Settings tab first.</p>
-      <form id="email-run-form">
-        <label for="er-project">Project <span style="color:#6a6a75;">(or leave blank for Q&amp;A)</span></label>
-        <select id="er-project">
-          <option value="">— Q&amp;A (no project) —</option>
-        </select>
-
-        <label for="er-agent">Agent</label>
-        <select id="er-agent">
-          <option value="claude">Claude Code</option>
-          <option value="cursor">Cursor Agent</option>
-        </select>
-
-        <label for="er-prompt">Prompt</label>
-        <textarea id="er-prompt" required placeholder="Describe what you want the agent to do…" style="min-height:140px;"></textarea>
-
-        <label for="er-to">Send response to (email)</label>
-        <input id="er-to" type="email" required placeholder="you@example.com" autocomplete="email">
-
-        <div class="row" style="margin-top:16px;">
-          <button type="submit" id="er-submit">Run &amp; Email</button>
-        </div>
-      </form>
-      <div id="er-result" class="result-box"></div>
-    </div>
-  </div>
-
-  <!-- ── Sessions ──────────────────────────────────────────────── -->
-  <div id="panel-sessions" class="panel">
-    <div class="card">
-      <h2>Chat Sessions</h2>
-      <table id="sessions-table"></table>
-      <div class="help" style="margin-top:12px;">Sessions remember conversation history per (chat × project). Clear to start fresh.</div>
-    </div>
-  </div>
-
-  <!-- ── Settings ──────────────────────────────────────────────── -->
-  <div id="panel-settings" class="panel">
-    <div class="card">
-      <h2>Agent Configuration</h2>
-      <form id="settings-form">
-        <h3>Telegram</h3>
-        <div id="tg-unconfigured" class="auth-banner" style="display:none;">
-          Bot token not set — the Telegram bot will not start until you save a valid token below.
-        </div>
-        <label for="s-botToken">Bot Token</label>
-        <input id="s-botToken" type="password" placeholder="1234567890:ABCdef..." autocomplete="new-password">
-        <div class="help">Get your token from <a href="https://t.me/BotFather" target="_blank" rel="noopener" style="color:#4d7cff;">@BotFather</a> on Telegram. Saving a new token restarts the bot automatically.</div>
-
-        <div class="grid2" style="margin-top:4px;">
-          <div>
-            <label for="s-allowedUsers">Allowed Usernames <span style="color:#6a6a75;">(comma-separated, without @)</span></label>
-            <input id="s-allowedUsers" placeholder="alice, bob" autocomplete="off">
+        <!-- Global Auth Banner -->
+        <div id="auth" class="auth-banner" style="display:none;">
+          <div style="display:flex; align-items:center; gap: 8px; font-weight:600;">
+            <i data-lucide="shield-alert" style="width:18px;height:18px;"></i> Authentication Required
           </div>
-          <div>
-            <label for="s-allowedUserIds">Allowed User IDs <span style="color:#6a6a75;">(comma-separated, numeric)</span></label>
-            <input id="s-allowedUserIds" placeholder="123456789, 987654321" autocomplete="off">
-          </div>
-        </div>
-        <div class="help">At least one username or user ID is required for the bot to accept messages.</div>
-
-        <h3>Agent Executables</h3>
-        <div class="grid2">
-          <div>
-            <label for="s-claudeCmd">Claude Command</label>
-            <input id="s-claudeCmd" placeholder="claude" autocomplete="off">
-            <div class="help">Full path or executable name on PATH (e.g. <code>claude</code> or <code>C:\...\claude.cmd</code>)</div>
-          </div>
-          <div>
-            <label for="s-cursorCmd">Cursor Command</label>
-            <input id="s-cursorCmd" placeholder="cursor-agent" autocomplete="off">
+          <div style="color:rgba(255,255,255,0.7);">Enter your dashboard token to access the settings and manage projects.</div>
+          <div class="row">
+            <input id="token-input" type="password" placeholder="Dashboard token" style="flex:1; max-width: 300px; padding: 10px;">
+            <button id="token-save" style="padding: 10px 16px;">Authenticate</button>
           </div>
         </div>
 
-        <h3>Behaviour</h3>
-        <div class="grid2">
-          <div>
-            <label for="s-permissionMode">Claude Permission Mode</label>
-            <select id="s-permissionMode">
-              <option value="bypassPermissions">bypassPermissions (default)</option>
-              <option value="acceptEdits">acceptEdits</option>
-              <option value="plan">plan</option>
-              <option value="default">default</option>
-            </select>
+        <!-- ── Projects Panel ─────────────────────────────────────────────── -->
+        <div id="panel-projects" class="panel active">
+          
+          <div class="card">
+            <h2><i data-lucide="folder-git-2" style="width:20px;"></i> Configured Projects</h2>
+            <table id="projects-table"></table>
           </div>
-          <div>
-            <label for="s-agentTimeoutMs">Agent Timeout (minutes)</label>
-            <input id="s-agentTimeoutMs" type="number" min="1" max="360" placeholder="60">
-          </div>
-        </div>
-
-        <label for="s-freeformCwd">Q&amp;A Scratch Directory <span style="color:#6a6a75;">(optional)</span></label>
-        <input id="s-freeformCwd" placeholder="Leave blank for default (data/scratch)" autocomplete="off">
-        <div class="help">Working directory used by /claude and /cursor when no project is active.</div>
-
-        <h3>Email (SMTP)</h3>
-        <div class="toggle-row">
-          <input id="s-emailEnabled" type="checkbox">
-          <label for="s-emailEnabled">Enable email delivery</label>
-        </div>
-
-        <div id="smtp-fields">
-          <div class="grid2">
-            <div>
-              <label for="s-smtpHost">SMTP Host</label>
-              <input id="s-smtpHost" placeholder="smtp.gmail.com" autocomplete="off">
-            </div>
-            <div>
-              <label for="s-smtpPort">SMTP Port</label>
-              <input id="s-smtpPort" type="number" placeholder="587">
-            </div>
-          </div>
-          <div class="grid2">
-            <div>
-              <label for="s-smtpUser">SMTP Username</label>
-              <input id="s-smtpUser" placeholder="you@gmail.com" autocomplete="off">
-            </div>
-            <div>
-              <label for="s-smtpPass">SMTP Password</label>
-              <input id="s-smtpPass" type="password" placeholder="App password / token" autocomplete="new-password">
-            </div>
-          </div>
-          <div class="grid2">
-            <div>
-              <label for="s-smtpFrom">From Address</label>
-              <input id="s-smtpFrom" placeholder="PromptBridge &lt;you@gmail.com&gt;" autocomplete="off">
-            </div>
-            <div>
-              <div class="toggle-row" style="margin-top:32px;">
-                <input id="s-smtpSecure" type="checkbox">
-                <label for="s-smtpSecure">Use TLS (port 465)</label>
+          
+          <div class="card">
+            <h2 id="form-title"><i data-lucide="plus-circle" style="width:20px;"></i> Add Project</h2>
+            <form id="project-form">
+              <input type="hidden" id="id">
+              
+              <div class="grid2">
+                <div>
+                  <label for="name">Project Name</label>
+                  <input id="name" required placeholder="my-app" autocomplete="off">
+                </div>
+                <div>
+                  <label for="cwd">Working Directory</label>
+                  <input id="cwd" required placeholder="D:/Personal/my-app" autocomplete="off">
+                  <div class="help">The agent is locked to this directory.</div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="row" style="margin-top:8px;">
-            <button type="button" class="ghost" id="test-smtp">Test SMTP Connection</button>
+
+              <div class="grid2">
+                <div>
+                  <label for="agent">Default Agent</label>
+                  <select id="agent">
+                    <option value="claude">Claude Code</option>
+                    <option value="cursor">Cursor Agent</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="model">Model <span style="color:#6a6a75;">(optional)</span></label>
+                  <input id="model" list="model-presets" autocomplete="off" placeholder="e.g. opus, sonnet, haiku...">
+                  <datalist id="model-presets"></datalist>
+                </div>
+              </div>
+
+              <label for="systemPrompt">System Prompt <span style="color:#6a6a75;">(optional)</span></label>
+              <textarea id="systemPrompt" placeholder="Always read existing code before editing…"></textarea>
+              <div class="help">Project name & working directory are injected automatically.</div>
+
+              <div class="row" style="margin-top: 24px;">
+                <button type="submit" id="save-btn"><i data-lucide="save" style="width:16px;"></i> Save Project</button>
+                <button type="button" class="ghost" id="cancel">Reset</button>
+              </div>
+            </form>
           </div>
         </div>
 
-        <h3>Email (IMAP Inbound)</h3>
-        <div class="toggle-row">
-          <input id="s-inboundEnabled" type="checkbox">
-          <label for="s-inboundEnabled">Enable inbound email (listen for commands)</label>
+        <!-- ── Email Run Panel ─────────────────────────────────────────────── -->
+        <div id="panel-email-run" class="panel">
+          <div class="card">
+            <h2><i data-lucide="send" style="width:20px;"></i> Run Agent &amp; Email Response</h2>
+            <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin:0 0 24px">Trigger an agent run from the dashboard and receive the full response by email. Ensure SMTP is configured in the Settings tab first.</p>
+            
+            <form id="email-run-form">
+              <div class="grid2">
+                <div>
+                  <label for="er-project">Project <span style="color:#6a6a75;">(or leave blank for Q&amp;A)</span></label>
+                  <select id="er-project">
+                    <option value="">— Q&amp;A (no project) —</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="er-agent">Agent</label>
+                  <select id="er-agent">
+                    <option value="claude">Claude Code</option>
+                    <option value="cursor">Cursor Agent</option>
+                  </select>
+                </div>
+              </div>
+
+              <label for="er-to">Recipient Email</label>
+              <input id="er-to" type="email" required placeholder="you@example.com" autocomplete="email">
+
+              <label for="er-prompt">Prompt</label>
+              <textarea id="er-prompt" required placeholder="Describe what you want the agent to do…" style="min-height:140px;"></textarea>
+
+              <div class="row" style="margin-top:24px;">
+                <button type="submit" id="er-submit"><i data-lucide="mail-fast" style="width:16px;"></i> Dispatch Agent</button>
+              </div>
+            </form>
+            <div id="er-result" class="result-box"></div>
+          </div>
         </div>
 
-        <div id="imap-fields">
-          <div class="grid2">
-            <div>
-              <label for="s-imapHost">IMAP Host</label>
-              <input id="s-imapHost" placeholder="imap.gmail.com" autocomplete="off">
-            </div>
-            <div>
-              <label for="s-imapPort">IMAP Port</label>
-              <input id="s-imapPort" type="number" placeholder="993">
-            </div>
-          </div>
-          <div class="grid2">
-            <div>
-              <label for="s-imapUser">IMAP Username</label>
-              <input id="s-imapUser" placeholder="you@gmail.com" autocomplete="off">
-            </div>
-            <div>
-              <label for="s-imapPass">IMAP Password</label>
-              <input id="s-imapPass" type="password" placeholder="App password / token" autocomplete="new-password">
-            </div>
-          </div>
-          <div class="toggle-row" style="margin-top:12px;">
-            <input id="s-imapTls" type="checkbox" checked>
-            <label for="s-imapTls">Use TLS (Secure)</label>
-          </div>
-          <div class="row" style="margin-top:8px;">
-            <button type="button" class="ghost" id="test-imap">Test IMAP Connection</button>
+        <!-- ── Sessions Panel ──────────────────────────────────────────────── -->
+        <div id="panel-sessions" class="panel">
+          <div class="card">
+            <h2><i data-lucide="messages-square" style="width:20px;"></i> Active Chat Sessions</h2>
+            <div class="help" style="margin: -8px 0 24px;">Sessions remember conversation history per chat & project. Clear to start fresh.</div>
+            <table id="sessions-table"></table>
           </div>
         </div>
 
-        <h3>Access Control</h3>
-        <label for="s-allowedEmails">Allowed Emails <span style="color:#6a6a75;">(comma-separated)</span></label>
-        <textarea id="s-allowedEmails" placeholder="user1@example.com, user2@gmail.com"></textarea>
-        <div class="help">Only emails from these addresses will trigger agent runs.</div>
+        <!-- ── Settings Panel ──────────────────────────────────────────────── -->
+        <div id="panel-settings" class="panel">
+          
+          <div id="tg-unconfigured" class="auth-banner" style="display:none;">
+            <div style="display:flex; align-items:center; gap: 8px; font-weight:600;"><i data-lucide="alert-triangle" style="width:18px;"></i> Telegram Not Configured</div>
+            <span style="color: rgba(255,255,255,0.7);">Bot missing token — the Telegram bot will not start until you save a valid token below.</span>
+          </div>
 
-        <div class="row" style="margin-top:24px;">
-          <button type="submit">Save Settings</button>
+          <div class="card">
+            <h2><i data-lucide="sliders-horizontal" style="width:20px;"></i> Core Configuration</h2>
+            <form id="settings-form">
+              
+              <h3>Telegram Bot</h3>
+              <label for="s-botToken">Bot Token</label>
+              <input id="s-botToken" type="password" placeholder="1234567890:ABCdef..." autocomplete="new-password">
+              <div class="help">Get token from <a href="https://t.me/BotFather" target="_blank" style="color:var(--accent);">@BotFather</a>. Saving auto-restarts the bot.</div>
+
+              <div class="grid2" style="margin-top:8px;">
+                <div>
+                  <label for="s-allowedUsers">Allowed Usernames</label>
+                  <input id="s-allowedUsers" placeholder="alice, bob" autocomplete="off">
+                  <div class="help">Comma-separated, no @ needed.</div>
+                </div>
+                <div>
+                  <label for="s-allowedUserIds">Allowed User IDs</label>
+                  <input id="s-allowedUserIds" placeholder="123456789, 987654321" autocomplete="off">
+                  <div class="help">Numeric Telegram IDs.</div>
+                </div>
+              </div>
+
+              <h3>Local Agents</h3>
+              <div class="grid2">
+                <div>
+                  <label for="s-claudeCmd">Claude Executable path</label>
+                  <input id="s-claudeCmd" placeholder="claude" autocomplete="off">
+                </div>
+                <div>
+                  <label for="s-cursorCmd">Cursor Executable path</label>
+                  <input id="s-cursorCmd" placeholder="cursor-agent" autocomplete="off">
+                </div>
+              </div>
+
+              <div class="grid2">
+                <div>
+                  <label for="s-permissionMode">Claude Permission Mode</label>
+                  <select id="s-permissionMode">
+                    <option value="bypassPermissions">bypassPermissions (default)</option>
+                    <option value="acceptEdits">acceptEdits</option>
+                    <option value="plan">plan</option>
+                    <option value="default">default</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="s-agentTimeoutMs">Agent Timeout (minutes)</label>
+                  <input id="s-agentTimeoutMs" type="number" min="1" max="360" placeholder="60">
+                </div>
+              </div>
+
+              <label for="s-freeformCwd">Q&amp;A Scratch Directory</label>
+              <input id="s-freeformCwd" placeholder="Leave blank for default (data/scratch)" autocomplete="off">
+              <div class="help">Default working directory for freeform Q&A commands.</div>
+
+              <h3>Email Delivery (Outbound SMTP)</h3>
+              <div class="toggle-row">
+                <input id="s-emailEnabled" type="checkbox">
+                <label for="s-emailEnabled" style="font-weight: 500;">Enable email response delivery</label>
+              </div>
+
+              <div id="smtp-fields" style="display:none; margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.1); border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+                <div class="grid2">
+                  <div>
+                    <label for="s-smtpHost" style="margin-top:0;">SMTP Host</label>
+                    <input id="s-smtpHost" placeholder="smtp.gmail.com" autocomplete="off">
+                  </div>
+                  <div>
+                    <label for="s-smtpPort" style="margin-top:0;">Port</label>
+                    <input id="s-smtpPort" type="number" placeholder="587">
+                  </div>
+                </div>
+                <div class="grid2">
+                  <div>
+                    <label for="s-smtpUser">Username</label>
+                    <input id="s-smtpUser" placeholder="you@gmail.com" autocomplete="off">
+                  </div>
+                  <div>
+                    <label for="s-smtpPass">App Password</label>
+                    <input id="s-smtpPass" type="password" placeholder="Secure token" autocomplete="new-password">
+                  </div>
+                </div>
+                <div class="grid2">
+                  <div>
+                    <label for="s-smtpFrom">From Address</label>
+                    <input id="s-smtpFrom" placeholder="PromptBridge <you@gmail.com>" autocomplete="off">
+                  </div>
+                  <div style="display:flex; align-items:flex-end;">
+                    <div class="toggle-row" style="margin-bottom:10px;">
+                      <input id="s-smtpSecure" type="checkbox">
+                      <label for="s-smtpSecure">Use TLS</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:16px;">
+                  <button type="button" class="ghost" id="test-smtp"><i data-lucide="mail-check" style="width:16px;"></i> Test SMTP</button>
+                </div>
+              </div>
+
+              <h3>Email Triggers (Inbound IMAP)</h3>
+              <div class="toggle-row">
+                <input id="s-inboundEnabled" type="checkbox">
+                <label for="s-inboundEnabled" style="font-weight: 500;">Enable inbound email listener</label>
+              </div>
+
+              <div id="imap-fields" style="display:none; margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.1); border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+                <div class="grid2">
+                  <div>
+                    <label for="s-imapHost" style="margin-top:0;">IMAP Host</label>
+                    <input id="s-imapHost" placeholder="imap.gmail.com" autocomplete="off">
+                  </div>
+                  <div>
+                    <label for="s-imapPort" style="margin-top:0;">Port</label>
+                    <input id="s-imapPort" type="number" placeholder="993">
+                  </div>
+                </div>
+                <div class="grid2">
+                  <div>
+                    <label for="s-imapUser">Username</label>
+                    <input id="s-imapUser" placeholder="you@gmail.com" autocomplete="off">
+                  </div>
+                  <div>
+                    <label for="s-imapPass">App Password</label>
+                    <input id="s-imapPass" type="password" placeholder="Secure token" autocomplete="new-password">
+                  </div>
+                </div>
+                <div class="toggle-row">
+                  <input id="s-imapTls" type="checkbox" checked>
+                  <label for="s-imapTls">Use TLS (Secure)</label>
+                </div>
+                <div class="row" style="margin-top:16px;">
+                  <button type="button" class="ghost" id="test-imap"><i data-lucide="mail-check" style="width:16px;"></i> Test IMAP</button>
+                </div>
+              </div>
+
+              <h3>Email Access Control</h3>
+              <label for="s-allowedEmails">Permitted Sender Emails</label>
+              <textarea id="s-allowedEmails" placeholder="alice@company.com, admin@domain.com" style="min-height:80px;"></textarea>
+              <div class="help">Comma-separated. Essential for security to prevent unauthorized code execution.</div>
+
+              <div class="row" style="margin-top:32px; border-top: 1px solid var(--glass-border); padding-top: 24px;">
+                <button type="submit"><i data-lucide="check" style="width:16px;"></i> Apply Settings Defaults</button>
+              </div>
+            </form>
+          </div>
+          
+          <div class="card" style="background: rgba(0,0,0,0.2);">
+            <h2 style="font-size: 14px; margin-bottom: 12px; color: var(--text-muted);"><i data-lucide="file-code-2" style="width:16px;"></i> Environment Override (.env)</h2>
+            <p style="font-size:13px;color:var(--text-muted);margin:0;line-height:1.5;">Values hardcoded in system environment variables (.env file). Adjust via dashboard if configured, else restart server required to effect changes.</p>
+            <table style="margin-top:16px;">
+              <tr><th style="padding: 8px 12px; font-size:11px;">Environment Key</th><th style="padding: 8px 12px; font-size:11px;">Status value</th></tr>
+              <tr><td style="padding: 8px 12px;"><code>PORT</code></td><td style="padding: 8px 12px;"><span id="ro-port" style="color:var(--text-muted);">—</span></td></tr>
+              <tr><td style="padding: 8px 12px;"><code>DASHBOARD_TOKEN</code></td><td style="padding: 8px 12px;"><span id="ro-dashToken" style="color:var(--text-muted);">—</span></td></tr>
+            </table>
+          </div>
+
         </div>
-      </form>
-    </div>
 
-    <div class="card">
-      <h2>Bootstrap Config (read-only)</h2>
-      <p style="font-size:13px;color:#8a8a95;margin:0">These values are set in your <code>.env</code> file and require a restart to change. All other settings (including Telegram token) are configured above.</p>
-      <table style="margin-top:12px;">
-        <tr><th>Key</th><th>Value</th></tr>
-        <tr><td><code>PORT</code></td><td><span id="ro-port" style="color:#6a6a75;">—</span></td></tr>
-        <tr><td><code>DASHBOARD_TOKEN</code></td><td><span id="ro-dashToken" style="color:#6a6a75;">—</span></td></tr>
-      </table>
+      </div>
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div id="toast" class="toast">
+    <i data-lucide="info" style="width: 20px;"></i>
+    <span class="toast-text">Success message</span>
+  </div>
 
-  <script>
-    const $ = (s) => document.querySelector(s);
-    const TOKEN_KEY = 'promptbridge-token';
-
-    function toast(msg, kind) {
-      const el = $('#toast');
-      el.textContent = msg;
-      el.className = 'toast show' + (kind === 'error' ? ' error' : kind === 'ok' ? ' ok' : '');
-      clearTimeout(toast._t);
-      toast._t = setTimeout(() => el.classList.remove('show'), 3000);
-    }
-
-    function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
-    function setToken(v) { localStorage.setItem(TOKEN_KEY, v); }
-
-    async function api(path, opts = {}) {
-      const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-      const tok = getToken();
-      if (tok) headers['Authorization'] = 'Bearer ' + tok;
-      const r = await fetch(path, { ...opts, headers });
-      if (r.status === 401) { $('#auth').style.display = 'block'; throw new Error('Unauthorized'); }
-      const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || 'Request failed');
-      return data;
-    }
-
-    function escape(s) {
-      return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-
-    function fmtUptime(sec) {
-      if (sec < 60) return sec + 's';
-      const m = Math.floor(sec / 60);
-      if (m < 60) return m + 'm ' + (sec % 60) + 's';
-      return Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
-    }
-
-    // ── Status ──────────────────────────────────────────────────
-    async function loadStatus() {
-      try {
-        const s = await fetch('/api/status').then((r) => r.json());
-        const tg = s.botRunning
-          ? '<span class="pill ok">telegram on</span>'
-          : (s.telegramConfigured ? '<span class="pill warn">telegram starting</span>' : '<span class="pill warn">telegram not set</span>');
-        const auth = s.authRequired
-          ? (getToken() ? '<span class="pill ok">auth ok</span>' : '<span class="pill warn">locked</span>')
-          : '<span class="pill warn">no auth</span>';
-        const email = s.emailEnabled ? '<span class="pill ok">email on</span>' : '';
-        $('#status').innerHTML = [tg, auth, email,
-          '<span class="kv">v<b>' + escape(s.version || '?') + '</b></span>',
-          '<span class="kv">up <b>' + fmtUptime(s.uptimeSec || 0) + '</b></span>',
-          '<span class="kv">inflight <b>' + (s.inflightChats || 0) + '</b></span>',
-        ].filter(Boolean).join(' ');
-        if (s.authRequired && !getToken()) $('#auth').style.display = 'block';
-      } catch {
-        $('#status').innerHTML = '<span class="pill warn">offline</span>';
-      }
-    }
-
-    $('#token-save').addEventListener('click', async () => {
-      const v = $('#token-input').value.trim();
-      if (!v) return;
-      setToken(v);
-      try {
-        await api('/api/projects');
-        $('#auth').style.display = 'none';
-        toast('Authenticated', 'ok');
-        loadAll();
-      } catch { toast('Invalid token', 'error'); }
-    });
-
-    // ── Tabs ─────────────────────────────────────────────────────
-    document.querySelectorAll('.tab').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
-        tab.classList.add('active');
-        $('#panel-' + tab.dataset.tab).classList.add('active');
-        if (tab.dataset.tab === 'sessions') loadSessions();
-        if (tab.dataset.tab === 'settings') loadSettings();
-        if (tab.dataset.tab === 'email-run') populateEmailProjectList();
-      });
-    });
-
-    // ── Projects ─────────────────────────────────────────────────
-    let projectCache = [];
-    async function loadProjects() {
-      const table = $('#projects-table');
-      try { projectCache = await api('/api/projects'); } catch { return; }
-      if (!projectCache.length) {
-        table.innerHTML = '<tr><td class="empty">No projects yet. Add one below.</td></tr>';
-        return;
-      }
-      table.innerHTML =
-        '<tr><th>Name</th><th>Agent</th><th>Model</th><th>Working Dir</th><th>System Prompt</th><th></th></tr>' +
-        projectCache.map((p) => `
-          <tr>
-            <td><strong>${escape(p.name)}</strong></td>
-            <td><span class="pill">${escape(p.agent)}</span></td>
-            <td>${p.model ? '<code>' + escape(p.model) + '</code>' : '<span style="color:#6a6a75;">default</span>'}</td>
-            <td><code>${escape(p.cwd)}</code></td>
-            <td style="max-width:220px;color:#8a8a95;font-size:12px;">${escape((p.systemPrompt||'').slice(0,100))}${p.systemPrompt&&p.systemPrompt.length>100?'…':''}</td>
-            <td><div class="row">
-              <button class="ghost" data-edit="${p.id}">Edit</button>
-              <button class="danger" data-delete="${p.id}">Delete</button>
-            </div></td>
-          </tr>`).join('');
-    }
-
-    $('#projects-table').addEventListener('click', async (e) => {
-      const editId = e.target.dataset.edit;
-      const delId = e.target.dataset.delete;
-      if (editId) {
-        const p = projectCache.find((x) => x.id === editId);
-        $('#id').value = p.id; $('#name').value = p.name; $('#cwd').value = p.cwd;
-        $('#agent').value = p.agent; $('#model').value = p.model || '';
-        $('#systemPrompt').value = p.systemPrompt || '';
-        populateModelPresets();
-        $('#form-title').textContent = 'Edit Project: ' + p.name;
-        $('#save-btn').textContent = 'Update Project';
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      } else if (delId) {
-        if (!confirm('Delete this project? Its sessions will also be cleared.')) return;
-        try { await api('/api/projects/' + delId, { method: 'DELETE' }); toast('Deleted'); loadProjects(); }
-        catch (err) { toast(err.message, 'error'); }
-      }
-    });
-
-    function resetForm() {
-      $('#project-form').reset(); $('#id').value = '';
-      $('#form-title').textContent = 'Add Project';
-      $('#save-btn').textContent = 'Save Project';
-      populateModelPresets();
-    }
-    $('#cancel').addEventListener('click', resetForm);
-
-    $('#project-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = $('#id').value;
-      const data = { name: $('#name').value.trim(), cwd: $('#cwd').value.trim(), agent: $('#agent').value, model: $('#model').value.trim(), systemPrompt: $('#systemPrompt').value.trim() };
-      try {
-        await api(id ? '/api/projects/' + id : '/api/projects', { method: id ? 'PUT' : 'POST', body: JSON.stringify(data) });
-        toast(id ? 'Updated' : 'Created', 'ok'); resetForm(); loadProjects();
-      } catch (err) { toast(err.message, 'error'); }
-    });
-
-    let modelCache = null;
-    async function ensureModelCache() {
-      if (modelCache) return modelCache;
-      try { modelCache = await api('/api/models'); } catch { modelCache = { claude: [], cursor: [] }; }
-      return modelCache;
-    }
-    async function populateModelPresets() {
-      const mc = await ensureModelCache();
-      const presets = mc[$('#agent').value] || [];
-      $('#model-presets').innerHTML = presets.map((m) => `<option value="${escape(m.id)}">${escape(m.label)}</option>`).join('');
-    }
-    $('#agent').addEventListener('change', populateModelPresets);
-
-    // ── Email Run ─────────────────────────────────────────────────
-    async function populateEmailProjectList() {
-      const sel = $('#er-project');
-      const current = sel.value;
-      try {
-        const list = projectCache.length ? projectCache : await api('/api/projects');
-        sel.innerHTML = '<option value="">— Q&A (no project) —</option>' +
-          list.map((p) => `<option value="${escape(p.id)}">${escape(p.name)} [${escape(p.agent)}]</option>`).join('');
-        if (current) sel.value = current;
-      } catch {}
-    }
-
-    $('#email-run-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = $('#er-submit');
-      const result = $('#er-result');
-      btn.disabled = true;
-      btn.textContent = 'Submitting…';
-      result.className = 'result-box';
-      try {
-        const data = {
-          projectId: $('#er-project').value || null,
-          agent: $('#er-agent').value,
-          prompt: $('#er-prompt').value.trim(),
-          to: $('#er-to').value.trim(),
-        };
-        const r = await api('/api/run/email', { method: 'POST', body: JSON.stringify(data) });
-        result.textContent = '✅ ' + r.message;
-        result.className = 'result-box show';
-        toast('Run started — check your inbox', 'ok');
-      } catch (err) {
-        result.textContent = '❌ ' + err.message;
-        result.className = 'result-box show error';
-        toast(err.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Run & Email';
-      }
-    });
-
-    // ── Sessions ─────────────────────────────────────────────────
-    async function loadSessions() {
-      const table = $('#sessions-table');
-      let s;
-      try { s = await api('/api/sessions'); } catch { return; }
-      const projects = projectCache.length ? projectCache : await api('/api/projects').catch(() => []);
-      const projById = Object.fromEntries(projects.map((p) => [p.id, p]));
-      const entries = Object.entries(s);
-      if (!entries.length) { table.innerHTML = '<tr><td class="empty">No sessions yet.</td></tr>'; return; }
-      const rows = [];
-      for (const [chatId, sess] of entries) {
-        const activeName = sess.projectId && projById[sess.projectId]?.name || '(none)';
-        const sids = Object.entries(sess.sessionIds || {});
-        if (!sids.length) {
-          rows.push(`<tr><td><code>${escape(chatId)}</code></td><td>${escape(activeName)}</td><td><span style="color:#6a6a75;">no sessions</span></td><td></td></tr>`);
-        }
-        for (const [pid, sid] of sids) {
-          const pname = projById[pid]?.name || '(deleted)';
-          rows.push(`<tr>
-            <td><code>${escape(chatId)}</code></td>
-            <td>${pid === sess.projectId ? '●' : '○'} ${escape(pname)}</td>
-            <td><code>${escape(sid.slice(0,16))}…</code></td>
-            <td><button class="danger" data-clear="${escape(chatId)}|${escape(pid)}">Clear</button></td>
-          </tr>`);
-        }
-      }
-      table.innerHTML = '<tr><th>Chat ID</th><th>Project</th><th>Session ID</th><th></th></tr>' + rows.join('');
-    }
-
-    $('#sessions-table').addEventListener('click', async (e) => {
-      const arg = e.target.dataset.clear;
-      if (!arg) return;
-      const [chatId, pid] = arg.split('|');
-      if (!confirm('Clear this session?')) return;
-      try {
-        await api(`/api/sessions/${encodeURIComponent(chatId)}/${encodeURIComponent(pid)}`, { method: 'DELETE' });
-        toast('Cleared'); loadSessions();
-      } catch (err) { toast(err.message, 'error'); }
-    });
-
-    // ── Settings ─────────────────────────────────────────────────
-    function toggleSmtpFields() {
-      $('#smtp-fields').style.display = $('#s-emailEnabled').checked ? 'block' : 'none';
-    }
-    $('#s-emailEnabled').addEventListener('change', toggleSmtpFields);
-
-    function toggleImapFields() {
-      $('#imap-fields').style.display = $('#s-inboundEnabled').checked ? 'block' : 'none';
-    }
-    $('#s-inboundEnabled').addEventListener('change', toggleImapFields);
-
-    async function loadSettings() {
-      try {
-        const s = await api('/api/settings');
-
-        // Telegram
-        const tg = s.telegram || {};
-        $('#s-botToken').value = tg.botToken || '';
-        $('#s-allowedUsers').value = tg.allowedUsers || '';
-        $('#s-allowedUserIds').value = tg.allowedUserIds || '';
-
-        // Agent
-        $('#s-claudeCmd').value = s.claudeCmd || '';
-        $('#s-cursorCmd').value = s.cursorCmd || '';
-        $('#s-permissionMode').value = s.permissionMode || 'bypassPermissions';
-        $('#s-agentTimeoutMs').value = s.agentTimeoutMs ? Math.round(s.agentTimeoutMs / 60000) : 60;
-        $('#s-freeformCwd').value = s.freeformCwd || '';
-
-        // Email
-        const em = s.email || {};
-        $('#s-emailEnabled').checked = !!em.enabled;
-        $('#s-smtpHost').value = em.smtpHost || '';
-        $('#s-smtpPort').value = em.smtpPort || 587;
-        $('#s-smtpUser').value = em.smtpUser || '';
-        $('#s-smtpPass').value = em.smtpPass || '';
-        $('#s-smtpFrom').value = em.smtpFrom || '';
-        $('#s-smtpSecure').checked = !!em.smtpSecure;
-        toggleSmtpFields();
-
-        $('#s-inboundEnabled').checked = !!em.inboundEnabled;
-        $('#s-imapHost').value = em.imapHost || '';
-        $('#s-imapPort').value = em.imapPort || 993;
-        $('#s-imapUser').value = em.imapUser || '';
-        $('#s-imapPass').value = em.imapPass || '';
-        $('#s-imapTls').checked = em.imapTls !== false;
-        toggleImapFields();
-
-        $('#s-allowedEmails').value = (s.allowedEmails || []).join(', ');
-
-        // Bootstrap read-only + telegram status banner
-        const st = await fetch('/api/status').then((r) => r.json()).catch(() => ({}));
-        $('#ro-port').textContent = location.port || '80';
-        $('#ro-dashToken').textContent = st.authRequired ? '✔ set' : '✘ not set';
-        $('#tg-unconfigured').style.display = st.telegramConfigured ? 'none' : 'block';
-      } catch (err) { toast('Could not load settings: ' + err.message, 'error'); }
-    }
-
-    $('#settings-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const timeoutMin = parseFloat($('#s-agentTimeoutMs').value);
-      const patch = {
-        telegram: {
-          botToken: $('#s-botToken').value,
-          allowedUsers: $('#s-allowedUsers').value.trim(),
-          allowedUserIds: $('#s-allowedUserIds').value.trim(),
-        },
-        claudeCmd: $('#s-claudeCmd').value.trim() || 'claude',
-        cursorCmd: $('#s-cursorCmd').value.trim() || 'cursor-agent',
-        permissionMode: $('#s-permissionMode').value,
-        agentTimeoutMs: timeoutMin > 0 ? Math.round(timeoutMin * 60000) : 3600000,
-        freeformCwd: $('#s-freeformCwd').value.trim(),
-        email: {
-          enabled: $('#s-emailEnabled').checked,
-          smtpHost: $('#s-smtpHost').value.trim(),
-          smtpPort: parseInt($('#s-smtpPort').value) || 587,
-          smtpUser: $('#s-smtpUser').value.trim(),
-          smtpPass: $('#s-smtpPass').value,
-          smtpFrom: $('#s-smtpFrom').value.trim(),
-          smtpSecure: $('#s-smtpSecure').checked,
-          inboundEnabled: $('#s-inboundEnabled').checked,
-          imapHost: $('#s-imapHost').value.trim(),
-          imapPort: parseInt($('#s-imapPort').value) || 993,
-          imapUser: $('#s-imapUser').value.trim(),
-          imapPass: $('#s-imapPass').value,
-          imapTls: $('#s-imapTls').checked,
-        },
-        allowedEmails: $('#s-allowedEmails').value.split(',').map(e => e.trim()).filter(Boolean),
-      };
-      try {
-        await api('/api/settings', { method: 'PUT', body: JSON.stringify(patch) });
-        toast('Settings saved', 'ok');
-        loadStatus();
-        // Refresh telegram status banner after a short delay (bot may be restarting)
-        setTimeout(loadSettings, 1500);
-      } catch (err) { toast(err.message, 'error'); }
-    });
-
-    $('#test-smtp').addEventListener('click', async () => {
-      const btn = $('#test-smtp');
-      btn.disabled = true; btn.textContent = 'Testing…';
-      try {
-        const r = await api('/api/settings/email/test', { method: 'POST' });
-        toast(r.message, 'ok');
-      } catch (err) { toast(err.message, 'error'); }
-      finally { btn.disabled = false; btn.textContent = 'Test SMTP Connection'; }
-    });
-
-    $('#test-imap').addEventListener('click', async () => {
-      const btn = $('#test-imap');
-      btn.disabled = true; btn.textContent = 'Testing…';
-      try {
-        const r = await api('/api/settings/imap/test', { method: 'POST' });
-        toast(r.message, 'ok');
-      } catch (err) { toast(err.message, 'error'); }
-      finally { btn.disabled = false; btn.textContent = 'Test IMAP Connection'; }
-    });
-
-    // ── Init ─────────────────────────────────────────────────────
-    async function loadAll() {
-      await loadStatus();
-      await loadProjects();
-      populateModelPresets();
-    }
-
-    loadAll();
-    setInterval(loadStatus, 10000);
-  </script>
+  <script src="/app.js"></script>
 </body>
 </html>
