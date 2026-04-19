@@ -66,20 +66,15 @@ async function checkComments() {
               continue;
             }
 
-            // Get the issue number from the comment URL or from issue lookup
-            const { data: issue } = await octokit.rest.issues.get({
-              owner: repo.owner.login,
-              repo: repo.name,
-              issue_number: comment.issue_url.split('/').pop(),
-            }).catch(() => ({ data: { number: null } }));
-
-            if (!issue.number) continue;
+            // Extract issue number from comment.issue_url
+            const issueNum = parseInt(comment.issue_url.split('/').pop(), 10);
+            if (!issueNum) continue;
 
             const ctx = new GitHubContext({
               octokit,
               owner: repo.owner.login,
               repo: repo.name,
-              issueNumber: issue.number,
+              issueNumber: issueNum,
               commentId: comment.id,
               userId: comment.user.id,
               userName: comment.user.login,
@@ -118,11 +113,15 @@ async function checkComments() {
               continue;
             }
 
+            // Extract PR number from comment.pull_request_url
+            const prNum = parseInt(comment.pull_request_url.split('/').pop(), 10);
+            if (!prNum) continue;
+
             const ctx = new GitHubContext({
               octokit,
               owner: repo.owner.login,
               repo: repo.name,
-              issueNumber: comment.pull_request_review_id ? comment.pull_request_url.split('/').pop() : null,
+              issueNumber: prNum,
               commentId: comment.id,
               userId: comment.user.id,
               userName: comment.user.login,
