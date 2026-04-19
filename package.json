@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@slack/bolt": "^4.7.0",
+    "botbuilder": "^4.22.2",
     "cross-spawn": "^7.0.6",
     "discord.js": "^14.26.3",
     "dotenv": "^16.4.5",

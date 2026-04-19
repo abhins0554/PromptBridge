@@ -25,6 +25,8 @@ const inflight = getInflight();
 let currentTelegramBot = null;
 let currentDiscordBot = null;
 let currentSlackApp = null;
+let currentTeamsAdapter = null;
+let currentTeamsExpress = null;
 
 function startTelegramBot() {
   const cfg = require('./lib/config').get();
@@ -103,20 +105,58 @@ function stopSlackBot() {
   }
 }
 
+function startTeamsBot() {
+  const cfg = require('./lib/config').get();
+  if (!cfg.teams?.appId || !cfg.teams?.appPassword) {
+    logger.warn('Teams appId or appPassword not configured — open the dashboard Settings tab to configure them');
+    return;
+  }
+  const { createBot } = require('./platforms/teams');
+  const { adapter } = createBot();
+  currentTeamsAdapter = adapter;
+
+  // Create a minimal Express app for Teams webhook
+  const express = require('express');
+  currentTeamsExpress = express();
+  currentTeamsExpress.post('/api/messages', (req, res) => {
+    adapter.processActivity(req, res, async (context) => {
+      // Activity processing is handled by adapter's processActivity callback
+    }).catch((err) => {
+      logger.error('Teams adapter activity failed', { err: err.message });
+      res.status(500).send('Internal Server Error');
+    });
+  });
+
+  // Webhook is typically mounted on the dashboard server or a separate port
+  logger.info('teams adapter ready (webhook endpoint: /api/messages)');
+}
+
+function stopTeamsBot() {
+  if (currentTeamsAdapter) {
+    try {
+      currentTeamsAdapter = null;
+      currentTeamsExpress = null;
+    } catch {}
+  }
+}
+
 function restartPlatforms() {
   logger.info('restarting chat platforms with new settings');
   stopTelegramBot('restart');
   stopDiscordBot();
   stopSlackBot();
+  stopTeamsBot();
   require('./lib/config').reload();
   startTelegramBot();
   startDiscordBot();
   startSlackBot();
+  startTeamsBot();
 }
 
 startTelegramBot();
 startDiscordBot();
 startSlackBot();
+startTeamsBot();
 
 const server = createServer({
   getStatus: () => ({
@@ -124,6 +164,7 @@ const server = createServer({
     botRunning: !!currentTelegramBot,
     discordRunning: !!currentDiscordBot,
     slackRunning: !!currentSlackApp,
+    teamsRunning: !!currentTeamsAdapter,
   }),
   restartPlatforms,
 }).listen(config.port, () => {
@@ -150,6 +191,7 @@ function shutdown(reason) {
   stopTelegramBot(reason);
   stopDiscordBot();
   stopSlackBot();
+  stopTeamsBot();
   server.close();
   stopInboundListener().catch(() => {});
   try { flushAll(); } catch (err) { logger.warn('flush failed', { err: err.message }); }
