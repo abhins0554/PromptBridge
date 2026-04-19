@@ -251,6 +251,28 @@
                 </div>
               </div>
 
+              <h3>GitHub Integration</h3>
+              <label for="s-githubToken">Personal Access Token (PAT)</label>
+              <input id="s-githubToken" type="password" placeholder="ghp_..." autocomplete="new-password">
+              <div class="help">GitHub PAT with <code>repo</code> scope for private repos. Get one at <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a>. Falls back to <code>GITHUB_TOKEN</code> env var if blank.</div>
+
+              <label for="s-githubWebhookSecret">Webhook Secret <span style="color:#6a6a75;">(optional)</span></label>
+              <input id="s-githubWebhookSecret" type="password" placeholder="webhook-secret-key" autocomplete="off">
+              <div class="help">Set this in your GitHub webhook settings for signature verification. If not set, webhooks will be accepted from any source.</div>
+
+              <div class="grid2" style="margin-top:8px;">
+                <div>
+                  <label for="s-githubAllowedUsers">Allowed Usernames</label>
+                  <input id="s-githubAllowedUsers" placeholder="alice, bob" autocomplete="off">
+                  <div class="help">GitHub usernames (comma-separated). Leave blank to allow all users.</div>
+                </div>
+                <div>
+                  <label for="s-githubAllowedUserIds">Allowed User IDs</label>
+                  <input id="s-githubAllowedUserIds" placeholder="123456789" autocomplete="off">
+                  <div class="help">Numeric GitHub user IDs.</div>
+                </div>
+              </div>
+
               <h3>Local Agents</h3>
               <div class="grid2">
                 <div>

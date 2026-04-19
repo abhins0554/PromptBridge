@@ -6,11 +6,11 @@
 
 **Multi-platform AI agent orchestrator**
 
-Drive **Claude Code** and **Cursor** agents from **Telegram**, **Discord**, **Slack**, **Email**, or any platform you wire in — with a zero-config web dashboard.
+Drive **Claude Code** and **Cursor** agents from **Telegram**, **Discord**, **Slack**, **Teams**, **GitHub**, **Email**, or any platform you wire in — with a zero-config web dashboard.
 
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.17-brightgreen?logo=node.js)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platforms](https://img.shields.io/badge/Platforms-Telegram%20%7C%20Discord%20%7C%20Slack%20%7C%20Email-blueviolet)](#platforms)
+[![Platforms](https://img.shields.io/badge/Platforms-Telegram%20%7C%20Discord%20%7C%20Slack%20%7C%20Teams%20%7C%20Email-blueviolet)](#platforms)
 [![Powered by Claude](https://img.shields.io/badge/Powered%20by-Claude%20Code-orange)](https://claude.ai/code)
 
 </div>
@@ -19,28 +19,28 @@ Drive **Claude Code** and **Cursor** agents from **Telegram**, **Discord**, **Sl
 
 ## What is PromptBridge?
 
-PromptBridge lets you control AI coding agents from anywhere — your phone, Discord, Slack, your inbox, or a browser. Send a prompt via Telegram, Discord, Slack, or email, and get a full agent-powered response with file attachments, git diffs, and generated artifacts delivered back to you automatically.
+PromptBridge lets you control AI coding agents from anywhere — your phone, Discord, Slack, Teams, your inbox, or a browser. Send a prompt via Telegram, Discord, Slack, Teams, or email, and get a full agent-powered response with file attachments, git diffs, and generated artifacts delivered back to you automatically.
 
 <div align="center">
-<pre><code>You (Telegram / Discord / Slack / Email)
+<pre><code>You (Telegram / Discord / Slack / Teams / Email)
         │
         ▼
   PromptBridge
-  ┌──────────────────────────────────────┐
-  │  Dashboard  ·  REST API              │
-  │  ┌──────────┐  ┌──────────┐          │
-  │  │ Telegram │  │ Discord  │          │
-  │  │ Adapter  │  │ Adapter  │          │
-  │  └────┬─────┘  └────┬─────┘          │
-  │       │             │                │
-  │  ┌─────────┐  ┌──────────┐           │
-  │  │  Slack  │  │  Email   │           │
-  │  │ Adapter │  │ Adapter  │           │
-  │  └────┬────┘  └────┬─────┘           │
-  │       └──────┬─────┴────────────┐    │
-  │        Dispatcher                │
-  │   (platform-agnostic core)       │
-  └──────────────┬────────────────────┘
+  ┌─────────────────────────────────────────┐
+  │  Dashboard  ·  REST API                 │
+  │  ┌──────────┐  ┌──────────┐             │
+  │  │ Telegram │  │ Discord  │             │
+  │  │ Adapter  │  │ Adapter  │             │
+  │  └────┬─────┘  └────┬─────┘             │
+  │       │             │                  │
+  │  ┌─────────┐  ┌──────────┐  ┌────────┐ │
+  │  │  Slack  │  │   Teams  │  │ Email  │ │
+  │  │ Adapter │  │ Adapter  │  │Adapter │ │
+  │  └────┬────┘  └────┬─────┘  └───┬────┘ │
+  │       └──────┬─────┴──────┬─────┘      │
+  │        Dispatcher          │            │
+  │   (platform-agnostic)      │            │
+  └──────────────┬──────────────────────────┘
                  │
         ┌────────┴────────┐
         │                 │
@@ -56,6 +56,8 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
 - **Telegram bot** — send prompts, receive AI responses, manage projects, get file artifacts
 - **Discord bot** — use slash commands, buttons, plain channel messages, and attachments
 - **Slack app** — use slash commands, channel/thread replies, buttons, and file attachments
+- **Microsoft Teams bot** — use adaptive cards, team/group/personal chat, and file attachments
+- **GitHub integration** — mention `/claude` in issue/PR comments, bot responds as comments
 - **Email triggers** — send `hi /claude <prompt>` to your inbox, get a reply with results
 - **Email attachments** — attach files to your email; the agent reads them just like Telegram
 - **Inbound IMAP** — real-time email monitoring with IDLE push and exponential-backoff reconnect
@@ -63,8 +65,8 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
 - **Multi-project** — switch between configured codebases per chat session
 - **Session continuity** — agents remember conversation context across messages
 - **Git-aware** — sends file diffs and changed artifacts after each run
-- **Hot-reload settings** — change Telegram/Discord tokens, SMTP, or agent paths; active clients restart automatically
-- **Extensible** — platform-agnostic core makes it easy to add Discord or any other platform
+- **Hot-reload settings** — change Telegram/Discord/Teams/GitHub tokens, SMTP, or agent paths; active clients restart automatically
+- **Extensible** — platform-agnostic core makes it easy to add any messaging platform
 
 ---
 
@@ -123,6 +125,33 @@ npm run dev        # development — auto-restarts on file changes
 5. Paste your **Bot Token** and **App Token**, and add allowed usernames or user IDs
 6. Click **Save Settings** — Socket Mode connects and listens for interactions
 
+### Set up Microsoft Teams
+
+1. Create a bot in the [Azure Bot Service](https://portal.azure.com)
+2. Register the bot with Microsoft Bot Framework
+3. Generate an **App ID** and **App Password** (client secret)
+4. Configure the messaging endpoint to: `https://your-domain.com/api/messages`
+5. Open **http://localhost:3000** → **Settings** tab → **Teams App** section
+6. Paste your **App ID** and **App Password**, and add allowed usernames or user IDs
+7. Click **Save Settings** — Teams bot connects and listens for messages
+8. Add the bot to your Teams teams/groups — it will work in personal, group, and team chats
+
+### Set up GitHub
+
+1. Create a Personal Access Token at [github.com/settings/tokens/new](https://github.com/settings/tokens/new)
+   - Scope: `repo` for private repos, `public_repo` for public repos
+2. Open **http://localhost:3000** → **Settings** tab → **GitHub Integration** section
+3. Paste your PAT in **Personal Access Token (PAT)** field
+4. (Optional) Set a webhook secret for signature verification
+5. Add allowed GitHub usernames or user IDs (leave blank to allow all)
+6. Click **Save Settings**
+7. In GitHub, add a webhook to your repo:
+   - **Payload URL**: `https://your-domain.com/api/github/webhook`
+   - **Content type**: `application/json`
+   - **Events**: `Issues`, `Pull requests` (to get comments)
+   - (Optional) **Secret**: enter the same secret from step 4
+8. Users can now mention `/claude` in issue/PR comments, and the bot will respond
+
 ---
 
 ## Dashboard
@@ -134,7 +163,7 @@ The dashboard is the primary configuration interface. All runtime settings are s
 | **Projects** | Add, edit, delete project directories with agent + model settings |
 | **Email Run** | Trigger an agent run from the browser and receive the response by email |
 | **Sessions** | View and clear per-chat conversation sessions |
-| **Settings** | Telegram, Discord, Slack bot tokens and allowlists; agent executables; Claude permission mode; SMTP/IMAP for email |
+| **Settings** | Telegram, Discord, Slack, Teams, GitHub bot tokens and allowlists; agent executables; Claude permission mode; SMTP/IMAP for email |
 
 ---
 
@@ -194,6 +223,47 @@ Slack uses **message-based interactions** via Socket Mode. Send commands as regu
 | `/help` | Show help |
 
 Send messages with file attachments; the agent will read them from disk. Responses include any generated files as attachments.
+
+### Microsoft Teams
+
+Teams uses **adaptive cards** for rich interactions. Send commands as regular messages in personal, group, or team chats:
+
+| Command | Description |
+|---------|-------------|
+| `/claude <prompt>` | Ask Claude Code anything |
+| `/cursor <prompt>` | Ask Cursor agent anything |
+| `/projects` | List and switch active project (displays as adaptive card) |
+| `/use <project>` | Activate a project for the current chat |
+| `/current` | Show active project and session ID |
+| `/model` | Switch model for Q&A or active project |
+| `/reset` | Clear session history |
+| `/cancel` | Abort a running agent |
+| `/dashboard` | Dashboard URL |
+| `/help` | Show help |
+
+Teams supports **adaptive card buttons** for interactive menus. Send files with your message; the agent will read them from disk. Responses include generated files as downloadable attachments.
+
+### GitHub
+
+Mention `/claude` or `/cursor` in **issue comments** or **pull request comments** to trigger the agent. The bot responds directly to the same issue/PR:
+
+| Command | Description |
+|---------|-------------|
+| `/claude <prompt>` | Ask Claude Code in an issue/PR |
+| `/cursor <prompt>` | Ask Cursor agent in an issue/PR |
+| `/help` | Show available commands |
+
+**Example:** In an issue comment, type:
+```
+/claude fix this bug. Look at the error in the logs and implement a solution.
+```
+
+The bot will:
+1. Fetch the issue description and all previous comments
+2. Run Claude with the full context
+3. Post the solution as a reply comment
+
+**Session awareness:** The bot maintains conversation state per issue/PR, so follow-up `/claude` commands in the same issue include all previous context.
 
 ### Email
 
@@ -258,6 +328,14 @@ The reply arrives as a standard email with any generated files as attachments.
 | `SLACK_APP_TOKEN` | No | — | Legacy — set in dashboard instead |
 | `SLACK_ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
 | `SLACK_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
+| `TEAMS_APP_ID` | No | — | Legacy — set in dashboard instead |
+| `TEAMS_APP_PASSWORD` | No | — | Legacy — set in dashboard instead |
+| `TEAMS_ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
+| `TEAMS_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
+| `GITHUB_TOKEN` | No | — | Legacy — set in dashboard instead |
+| `GITHUB_WEBHOOK_SECRET` | No | — | Legacy — set in dashboard instead |
+| `GITHUB_ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
+| `GITHUB_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
 
 ### Dashboard settings (stored in `data/settings.json`)
 
@@ -270,6 +348,12 @@ The reply arrives as a standard email with any generated files as attachments.
 | Slack bot token | Bot User OAuth Token (`xoxb-...`) from Slack app |
 | Slack app token | Socket Mode App Token (`xapp-...`) from Slack app |
 | Slack allowlist | Usernames/user IDs for Slack access |
+| Teams app ID | Microsoft Bot Framework App ID |
+| Teams app password | Microsoft Bot Framework App Password (client secret) |
+| Teams allowlist | Usernames/user IDs for Teams access |
+| GitHub PAT | Personal Access Token with `repo` scope from github.com/settings/tokens |
+| GitHub webhook secret | (Optional) Secret for webhook signature verification |
+| GitHub allowlist | Usernames/user IDs for GitHub access |
 | Claude executable | Path to `claude` CLI (default: `claude`) |
 | Cursor executable | Path to `cursor-agent` CLI (default: `cursor-agent`) |
 | Permission mode | `bypassPermissions` / `acceptEdits` / `plan` / `default` |
@@ -300,6 +384,14 @@ platforms/
     index.js                  Slack Bolt Socket Mode app setup
     context.js                SlackContext — message + interaction handling
     attachments.js            Slack attachment download helpers
+  teams/
+    index.js                  Teams Bot Framework adapter + message processing
+    context.js                TeamsContext — adaptive cards + activity handling
+    attachments.js            Teams attachment download helpers
+  github/
+    index.js                  GitHub webhook listener — parses comments, routes commands
+    context.js                GitHubContext — posts responses as issue/PR comments
+    attachments.js            GitHub attachment utilities
   email/
     index.js                  EmailContext — buffers messages → sends one email
     inbound.js                IMAP listener — real-time email monitoring

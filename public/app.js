@@ -72,14 +72,17 @@
         const slack = s.slackRunning
           ? '<span class="pill ok"><i data-lucide="message-circle-more" style="width:12px;height:12px;"></i> slack ok</span>'
           : (s.slackConfigured ? '<span class="pill warn">slack starting</span>' : '<span class="pill warn">slack off</span>');
-        
+        const github = s.githubConfigured
+          ? '<span class="pill ok"><i data-lucide="github" style="width:12px;height:12px;"></i> github ok</span>'
+          : '<span class="pill warn">github off</span>';
+
         const auth = s.authRequired
           ? (getToken() ? '<span class="pill ok"><i data-lucide="lock" style="width:12px;height:12px;"></i> auth ok</span>' : '<span class="pill warn"><i data-lucide="unlock" style="width:12px;height:12px;"></i> locked</span>')
           : '<span class="pill warn">no auth</span>';
           
         const email = s.emailEnabled ? '<span class="pill ok"><i data-lucide="mail" style="width:12px;height:12px;"></i> email ok</span>' : '';
         
-        $('#status').innerHTML = [tg, discord, slack, auth, email,
+        $('#status').innerHTML = [tg, discord, slack, github, auth, email,
           '<span class="kv"><i data-lucide="tag" style="width:14px;height:14px;"></i> <b>v' + escape(s.version || '?') + '</b></span>',
           '<span class="kv"><i data-lucide="clock" style="width:14px;height:14px;"></i> up <b>' + fmtUptime(s.uptimeSec || 0) + '</b></span>',
           '<span class="kv"><i data-lucide="activity" style="width:14px;height:14px;"></i> inflight <b>' + (s.inflightChats || 0) + '</b></span>',
@@ -357,6 +360,13 @@
         $('#s-slackAllowedUsers').value = sl.allowedUsers || '';
         $('#s-slackAllowedUserIds').value = sl.allowedUserIds || '';
 
+        // GitHub
+        const gh = s.github || {};
+        $('#s-githubToken').value = gh.token || '';
+        $('#s-githubWebhookSecret').value = gh.webhookSecret || '';
+        $('#s-githubAllowedUsers').value = gh.allowedUsers || '';
+        $('#s-githubAllowedUserIds').value = gh.allowedUserIds || '';
+
         // Agent
         $('#s-claudeCmd').value = s.claudeCmd || '';
         $('#s-cursorCmd').value = s.cursorCmd || '';
@@ -415,6 +425,12 @@
           appToken: $('#s-slackAppToken').value,
           allowedUsers: $('#s-slackAllowedUsers').value.trim(),
           allowedUserIds: $('#s-slackAllowedUserIds').value.trim(),
+        },
+        github: {
+          token: $('#s-githubToken').value,
+          webhookSecret: $('#s-githubWebhookSecret').value,
+          allowedUsers: $('#s-githubAllowedUsers').value.trim(),
+          allowedUserIds: $('#s-githubAllowedUserIds').value.trim(),
         },
         claudeCmd: $('#s-claudeCmd').value.trim() || 'claude',
         cursorCmd: $('#s-cursorCmd').value.trim() || 'cursor-agent',

@@ -26,6 +26,14 @@ platforms/
     index.js                  Slack Bolt Socket Mode app setup
     context.js                SlackContext
     attachments.js            Slack attachment download helpers
+  teams/
+    index.js                  Teams Bot Framework adapter setup + message processing
+    context.js                TeamsContext — adaptive cards + activity handling
+    attachments.js            Teams attachment download helpers
+  github/
+    index.js                  GitHub webhook listener — parses comments, routes commands
+    context.js                GitHubContext — posts responses as issue/PR comments
+    attachments.js            GitHub attachment utilities (stub)
   email/
     index.js                  EmailContext (buffers msgs → sends one email)
     inbound.js                IMAP listener — IDLE loop, retry backoff, attachment saving
@@ -67,11 +75,14 @@ Every platform wraps its native event and implements `BotContext`:
 
 ### Config system (`lib/config.js`)
 - `.env` → bootstrap only (PORT, DASHBOARD_TOKEN, LOG_LEVEL)
-- `data/settings.json` → all runtime config (Telegram/Discord/Slack tokens + allowlists, agent paths, SMTP, timeouts, freeformCwd)
+- `data/settings.json` → all runtime config (Telegram/Discord/Slack/Teams/GitHub tokens + allowlists, agent paths, SMTP, timeouts, freeformCwd)
 - Telegram token/allowlist: `settings.json` takes precedence; `.env` BOT_TOKEN/ALLOWED_USERS still work as legacy fallback
 - Discord token/allowlist: `settings.json` takes precedence; `.env` DISCORD_BOT_TOKEN / DISCORD_ALLOWED_USERS / DISCORD_ALLOWED_USER_IDS still work as legacy fallback
 - Slack token/allowlist: `settings.json` takes precedence; `.env` SLACK_BOT_TOKEN / SLACK_APP_TOKEN / SLACK_ALLOWED_USERS / SLACK_ALLOWED_USER_IDS still work as legacy fallback
-- Settings edited via dashboard → `PUT /api/settings` → `saveSettings()` + `reloadConfig()` + auto-restart Telegram/Discord/Slack clients if bot settings changed
+- Teams token/allowlist: `settings.json` takes precedence; `.env` TEAMS_APP_ID / TEAMS_APP_PASSWORD / TEAMS_ALLOWED_USERS / TEAMS_ALLOWED_USER_IDS still work as legacy fallback
+- GitHub token/allowlist: `settings.json` takes precedence; `.env` GITHUB_TOKEN / GITHUB_WEBHOOK_SECRET / GITHUB_ALLOWED_USERS / GITHUB_ALLOWED_USER_IDS still work as legacy fallback
+- Settings edited via dashboard → `PUT /api/settings` → `saveSettings()` + `reloadConfig()` + auto-restart Telegram/Discord/Slack/Teams clients if bot settings changed
+- GitHub webhook is stateless — no polling or client connection needed, just HTTP webhooks to `/api/github/webhook`
 - `config.get()` has a 3-second TTL so changes propagate automatically
 - `runner.js` calls `require('./config').get()` fresh inside each `runClaude`/`runCursor` call
 
@@ -134,5 +145,13 @@ Every platform wraps its native event and implements `BotContext`:
 | `SLACK_APP_TOKEN` | No | — | Legacy fallback — set in dashboard instead |
 | `SLACK_ALLOWED_USERS` | No | — | Legacy fallback — set in dashboard instead |
 | `SLACK_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
+| `TEAMS_APP_ID` | No | — | Legacy fallback — set in dashboard instead |
+| `TEAMS_APP_PASSWORD` | No | — | Legacy fallback — set in dashboard instead |
+| `TEAMS_ALLOWED_USERS` | No | — | Legacy fallback — set in dashboard instead |
+| `TEAMS_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
+| `GITHUB_TOKEN` | No | — | Legacy fallback — set in dashboard instead |
+| `GITHUB_WEBHOOK_SECRET` | No | — | Legacy fallback — set in dashboard instead |
+| `GITHUB_ALLOWED_USERS` | No | — | Legacy fallback — set in dashboard instead |
+| `GITHUB_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
 
-All settings including Telegram, Discord, and Slack tokens + allowlists are configured via the dashboard Settings tab and stored in `data/settings.json`.
+All settings including Telegram, Discord, Slack, Teams, and GitHub tokens + allowlists are configured via the dashboard Settings tab and stored in `data/settings.json`.
