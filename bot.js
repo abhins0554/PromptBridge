@@ -22,7 +22,9 @@ logger.info('starting', {
 });
 
 const inflight = getInflight();
-let currentBot = null;
+let currentTelegramBot = null;
+let currentDiscordBot = null;
+let currentSlackApp = null;
 
 function startTelegramBot() {
   const cfg = require('./lib/config').get();
@@ -32,7 +34,7 @@ function startTelegramBot() {
   }
   const { createBot, COMMANDS } = require('./platforms/telegram');
   const { bot } = createBot();
-  currentBot = bot;
+  currentTelegramBot = bot;
 
   bot.telegram
     .setMyCommands(COMMANDS)
@@ -41,30 +43,89 @@ function startTelegramBot() {
 
   bot.launch().catch((err) => {
     logger.error('bot launch failed', { err: err.message });
-    currentBot = null;
+    currentTelegramBot = null;
   });
   logger.info('telegram polling started');
 }
 
 function stopTelegramBot(reason) {
-  if (currentBot) {
-    try { currentBot.stop(reason); } catch {}
-    currentBot = null;
+  if (currentTelegramBot) {
+    try { currentTelegramBot.stop(reason); } catch {}
+    currentTelegramBot = null;
   }
 }
 
-function restartTelegramBot() {
-  logger.info('restarting telegram bot with new settings');
+function startDiscordBot() {
+  const cfg = require('./lib/config').get();
+  if (!cfg.discord?.botToken) {
+    logger.warn('Discord bot token not configured — open the dashboard Settings tab to configure it');
+    return;
+  }
+  const { createBot } = require('./platforms/discord');
+  const { client } = createBot();
+  currentDiscordBot = client;
+
+  client.login(cfg.discord.botToken).catch((err) => {
+    logger.error('discord login failed', { err: err.message });
+    currentDiscordBot = null;
+  });
+  logger.info('discord client starting');
+}
+
+function stopDiscordBot() {
+  if (currentDiscordBot) {
+    try { currentDiscordBot.destroy(); } catch {}
+    currentDiscordBot = null;
+  }
+}
+
+function startSlackBot() {
+  const cfg = require('./lib/config').get();
+  if (!cfg.slack?.botToken || !cfg.slack?.appToken) {
+    logger.warn('Slack tokens not configured — open the dashboard Settings tab to configure them');
+    return;
+  }
+  const { createBot } = require('./platforms/slack');
+  const { app } = createBot();
+  currentSlackApp = app;
+
+  app.start().catch((err) => {
+    logger.error('slack app start failed', { err: err.message });
+    currentSlackApp = null;
+  });
+  logger.info('slack socket mode starting');
+}
+
+function stopSlackBot() {
+  if (currentSlackApp) {
+    try { currentSlackApp.stop(); } catch {}
+    currentSlackApp = null;
+  }
+}
+
+function restartPlatforms() {
+  logger.info('restarting chat platforms with new settings');
   stopTelegramBot('restart');
+  stopDiscordBot();
+  stopSlackBot();
   require('./lib/config').reload();
   startTelegramBot();
+  startDiscordBot();
+  startSlackBot();
 }
 
 startTelegramBot();
+startDiscordBot();
+startSlackBot();
 
 const server = createServer({
-  getStatus: () => ({ inflightChats: inflight.size, botRunning: !!currentBot }),
-  restartBot: restartTelegramBot,
+  getStatus: () => ({
+    inflightChats: inflight.size,
+    botRunning: !!currentTelegramBot,
+    discordRunning: !!currentDiscordBot,
+    slackRunning: !!currentSlackApp,
+  }),
+  restartPlatforms,
 }).listen(config.port, () => {
   logger.info('dashboard listening', { url: `http://localhost:${config.port}` });
 });
@@ -87,6 +148,8 @@ function shutdown(reason) {
   logger.info('shutting down', { reason });
   for (const ac of inflight.values()) ac.abort();
   stopTelegramBot(reason);
+  stopDiscordBot();
+  stopSlackBot();
   server.close();
   stopInboundListener().catch(() => {});
   try { flushAll(); } catch (err) { logger.warn('flush failed', { err: err.message }); }

@@ -18,6 +18,14 @@ platforms/
     index.js                  Telegraf bot setup + allowlist middleware
     context.js                TelegramContext / TelegramCallbackContext
     attachments.js            Telegram file download helpers
+  discord/
+    index.js                  Discord client setup + slash commands
+    context.js                DiscordContext / DiscordInteractionContext
+    attachments.js            Discord attachment download helpers
+  slack/
+    index.js                  Slack Bolt Socket Mode app setup
+    context.js                SlackContext
+    attachments.js            Slack attachment download helpers
   email/
     index.js                  EmailContext (buffers msgs → sends one email)
     inbound.js                IMAP listener — IDLE loop, retry backoff, attachment saving
@@ -59,9 +67,11 @@ Every platform wraps its native event and implements `BotContext`:
 
 ### Config system (`lib/config.js`)
 - `.env` → bootstrap only (PORT, DASHBOARD_TOKEN, LOG_LEVEL)
-- `data/settings.json` → all runtime config (Telegram token + allowlist, agent paths, SMTP, timeouts, freeformCwd)
+- `data/settings.json` → all runtime config (Telegram/Discord/Slack tokens + allowlists, agent paths, SMTP, timeouts, freeformCwd)
 - Telegram token/allowlist: `settings.json` takes precedence; `.env` BOT_TOKEN/ALLOWED_USERS still work as legacy fallback
-- Settings edited via dashboard → `PUT /api/settings` → `saveSettings()` + `reloadConfig()` + auto-restart Telegram bot if token changed
+- Discord token/allowlist: `settings.json` takes precedence; `.env` DISCORD_BOT_TOKEN / DISCORD_ALLOWED_USERS / DISCORD_ALLOWED_USER_IDS still work as legacy fallback
+- Slack token/allowlist: `settings.json` takes precedence; `.env` SLACK_BOT_TOKEN / SLACK_APP_TOKEN / SLACK_ALLOWED_USERS / SLACK_ALLOWED_USER_IDS still work as legacy fallback
+- Settings edited via dashboard → `PUT /api/settings` → `saveSettings()` + `reloadConfig()` + auto-restart Telegram/Discord/Slack clients if bot settings changed
 - `config.get()` has a 3-second TTL so changes propagate automatically
 - `runner.js` calls `require('./config').get()` fresh inside each `runClaude`/`runCursor` call
 

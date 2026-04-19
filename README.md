@@ -6,11 +6,11 @@
 
 **Multi-platform AI agent orchestrator**
 
-Drive **Claude Code** and **Cursor** agents from **Telegram**, **Email**, or any platform you wire in — with a zero-config web dashboard.
+Drive **Claude Code** and **Cursor** agents from **Telegram**, **Discord**, **Slack**, **Email**, or any platform you wire in — with a zero-config web dashboard.
 
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.17-brightgreen?logo=node.js)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platforms](https://img.shields.io/badge/Platforms-Telegram%20%7C%20Email-blueviolet)](#platforms)
+[![Platforms](https://img.shields.io/badge/Platforms-Telegram%20%7C%20Discord%20%7C%20Slack%20%7C%20Email-blueviolet)](#platforms)
 [![Powered by Claude](https://img.shields.io/badge/Powered%20by-Claude%20Code-orange)](https://claude.ai/code)
 
 </div>
@@ -19,20 +19,24 @@ Drive **Claude Code** and **Cursor** agents from **Telegram**, **Email**, or any
 
 ## What is PromptBridge?
 
-PromptBridge lets you control AI coding agents from anywhere — your phone, your inbox, or a browser. Send a prompt via Telegram or email, and get a full agent-powered response with file attachments, git diffs, and generated artifacts delivered back to you automatically.
+PromptBridge lets you control AI coding agents from anywhere — your phone, Discord, Slack, your inbox, or a browser. Send a prompt via Telegram, Discord, Slack, or email, and get a full agent-powered response with file attachments, git diffs, and generated artifacts delivered back to you automatically.
 
 <div align="center">
-<pre><code>You (Telegram / Email)
+<pre><code>You (Telegram / Discord / Slack / Email)
         │
         ▼
   PromptBridge
   ┌─────────────────────────────────┐
   │  Dashboard  ·  REST API         │
-  │  ┌──────────┐  ┌─────────────┐  │
-  │  │ Telegram │  │    Email    │  │
-  │  │ Adapter  │  │   Adapter   │  │
-  │  └────┬─────┘  └──────┬──────┘  │
-  │       └──────┬─────────┘        │
+  │  ┌──────────┐  ┌──────────┐     │
+  │  │ Telegram │  │ Discord  │     │
+  │  │ Adapter  │  │ Adapter  │     │
+  │  └────┬─────┘  └────┬─────┘     │
+  │  ┌─────────────┐     │          │
+  │  │    Email    │     │          │
+  │  │   Adapter   │     │          │
+  │  └──────┬──────┘     │          │
+  │       └──────┬───────┴────────┐ │
   │        Dispatcher               │
   │   (platform-agnostic core)      │
   └──────────────┬──────────────────┘
@@ -49,6 +53,8 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, you
 ## Features
 
 - **Telegram bot** — send prompts, receive AI responses, manage projects, get file artifacts
+- **Discord bot** — use slash commands, buttons, plain channel messages, and attachments
+- **Slack app** — use slash commands, channel/thread replies, buttons, and file attachments
 - **Email triggers** — send `hi /claude <prompt>` to your inbox, get a reply with results
 - **Email attachments** — attach files to your email; the agent reads them just like Telegram
 - **Inbound IMAP** — real-time email monitoring with IDLE push and exponential-backoff reconnect
@@ -56,7 +62,7 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, you
 - **Multi-project** — switch between configured codebases per chat session
 - **Session continuity** — agents remember conversation context across messages
 - **Git-aware** — sends file diffs and changed artifacts after each run
-- **Hot-reload settings** — change Telegram token, SMTP, or agent paths; the bot restarts itself
+- **Hot-reload settings** — change Telegram/Discord tokens, SMTP, or agent paths; active clients restart automatically
 - **Extensible** — platform-agnostic core makes it easy to add Discord or any other platform
 
 ---
@@ -99,6 +105,14 @@ npm run dev        # development — auto-restarts on file changes
 3. Enter allowed Telegram usernames or user IDs
 4. Click **Save Settings** — bot starts automatically, no restart needed
 
+### Set up Discord
+
+1. Create a Discord application + bot in the Discord developer portal
+2. Enable the **Message Content Intent**
+3. Open **http://localhost:3000** → **Settings** tab → **Discord Bot** section
+4. Paste your bot token and allowed usernames or user IDs
+5. Click **Save Settings** — the client connects and registers slash commands
+
 ---
 
 ## Dashboard
@@ -110,7 +124,7 @@ The dashboard is the primary configuration interface. All runtime settings are s
 | **Projects** | Add, edit, delete project directories with agent + model settings |
 | **Email Run** | Trigger an agent run from the browser and receive the response by email |
 | **Sessions** | View and clear per-chat conversation sessions |
-| **Settings** | Telegram token + allowlist, agent executables, Claude permission mode, SMTP/IMAP for email |
+| **Settings** | Telegram + Discord bot tokens and allowlists, agent executables, Claude permission mode, SMTP/IMAP for email |
 
 ---
 
@@ -132,6 +146,25 @@ The dashboard is the primary configuration interface. All runtime settings are s
 | `/help` | Show help |
 
 Plain text (no slash) runs the active project's agent. Send a file with a `/claude` or `/cursor` caption to have the agent read it.
+
+### Discord
+
+Use slash commands with the same command surface as Telegram:
+
+| Command | Description |
+|---------|-------------|
+| `/claude <prompt>` | Ask Claude Code anything |
+| `/cursor <prompt>` | Ask Cursor agent anything |
+| `/projects` | List and switch active project |
+| `/use <project>` | Activate a project for the current channel |
+| `/current` | Show active project and session ID |
+| `/model` | Switch model for Q&A or active project |
+| `/reset` | Clear session history |
+| `/cancel` | Abort a running agent |
+| `/dashboard` | Dashboard URL |
+| `/help` | Show help |
+
+Plain channel messages run the active project's agent. Send attachments with a `/claude` or `/cursor` message to have the agent read them from disk.
 
 ### Email
 
@@ -189,6 +222,9 @@ The reply arrives as a standard email with any generated files as attachments.
 | `LOG_LEVEL` | No | `info` | `debug` / `info` / `warn` / `error` |
 | `BOT_TOKEN` | No | — | Legacy — set in dashboard instead |
 | `ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
+| `DISCORD_BOT_TOKEN` | No | — | Legacy — set in dashboard instead |
+| `DISCORD_ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
+| `DISCORD_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
 
 ### Dashboard settings (stored in `data/settings.json`)
 
@@ -196,6 +232,8 @@ The reply arrives as a standard email with any generated files as attachments.
 |---------|-------------|
 | Telegram bot token | From [@BotFather](https://t.me/BotFather) |
 | Allowed usernames / user IDs | Allowlist for Telegram access |
+| Discord bot token | From the Discord developer portal |
+| Discord usernames / user IDs | Allowlist for Discord access |
 | Claude executable | Path to `claude` CLI (default: `claude`) |
 | Cursor executable | Path to `cursor-agent` CLI (default: `cursor-agent`) |
 | Permission mode | `bypassPermissions` / `acceptEdits` / `plan` / `default` |
@@ -218,6 +256,10 @@ platforms/
     index.js                  Telegraf bot setup + allowlist middleware
     context.js                TelegramContext / TelegramCallbackContext
     attachments.js            Telegram file download helpers
+  discord/
+    index.js                  Discord client setup + slash commands
+    context.js                DiscordContext / DiscordInteractionContext
+    attachments.js            Discord attachment download helpers
   email/
     index.js                  EmailContext — buffers messages → sends one email
     inbound.js                IMAP listener — real-time email monitoring

@@ -64,6 +64,12 @@
         const tg = s.botRunning
           ? '<span class="pill ok"><i data-lucide="check" style="width:12px;height:12px;"></i> bot ok</span>'
           : (s.telegramConfigured ? '<span class="pill warn">bot starting</span>' : '<span class="pill warn">bot unconfigured</span>');
+        const discord = s.discordRunning
+          ? '<span class="pill ok"><i data-lucide="messages-square" style="width:12px;height:12px;"></i> discord ok</span>'
+          : (s.discordConfigured ? '<span class="pill warn">discord starting</span>' : '<span class="pill warn">discord off</span>');
+        const slack = s.slackRunning
+          ? '<span class="pill ok"><i data-lucide="message-circle-more" style="width:12px;height:12px;"></i> slack ok</span>'
+          : (s.slackConfigured ? '<span class="pill warn">slack starting</span>' : '<span class="pill warn">slack off</span>');
         
         const auth = s.authRequired
           ? (getToken() ? '<span class="pill ok"><i data-lucide="lock" style="width:12px;height:12px;"></i> auth ok</span>' : '<span class="pill warn"><i data-lucide="unlock" style="width:12px;height:12px;"></i> locked</span>')
@@ -71,7 +77,7 @@
           
         const email = s.emailEnabled ? '<span class="pill ok"><i data-lucide="mail" style="width:12px;height:12px;"></i> email ok</span>' : '';
         
-        $('#status').innerHTML = [tg, auth, email,
+        $('#status').innerHTML = [tg, discord, slack, auth, email,
           '<span class="kv"><i data-lucide="tag" style="width:14px;height:14px;"></i> <b>v' + escape(s.version || '?') + '</b></span>',
           '<span class="kv"><i data-lucide="clock" style="width:14px;height:14px;"></i> up <b>' + fmtUptime(s.uptimeSec || 0) + '</b></span>',
           '<span class="kv"><i data-lucide="activity" style="width:14px;height:14px;"></i> inflight <b>' + (s.inflightChats || 0) + '</b></span>',
@@ -336,6 +342,19 @@
         $('#s-allowedUsers').value = tg.allowedUsers || '';
         $('#s-allowedUserIds').value = tg.allowedUserIds || '';
 
+        // Discord
+        const dc = s.discord || {};
+        $('#s-discordBotToken').value = dc.botToken || '';
+        $('#s-discordAllowedUsers').value = dc.allowedUsers || '';
+        $('#s-discordAllowedUserIds').value = dc.allowedUserIds || '';
+
+        // Slack
+        const sl = s.slack || {};
+        $('#s-slackBotToken').value = sl.botToken || '';
+        $('#s-slackAppToken').value = sl.appToken || '';
+        $('#s-slackAllowedUsers').value = sl.allowedUsers || '';
+        $('#s-slackAllowedUserIds').value = sl.allowedUserIds || '';
+
         // Agent
         $('#s-claudeCmd').value = s.claudeCmd || '';
         $('#s-cursorCmd').value = s.cursorCmd || '';
@@ -370,6 +389,8 @@
         $('#ro-port').textContent = location.port || '80';
         $('#ro-dashToken').textContent = st.authRequired ? 'Enabled (Valid Token Provided)' : 'Unprotected Default Root Access';
         $('#tg-unconfigured').style.display = st.telegramConfigured ? 'none' : 'flex';
+        $('#discord-unconfigured').style.display = st.discordConfigured ? 'none' : 'flex';
+        $('#slack-unconfigured').style.display = st.slackConfigured ? 'none' : 'flex';
       } catch (err) { toast('Subsystem failure on parameter hydration: ' + err.message, 'error'); }
     }
 
@@ -381,6 +402,17 @@
           botToken: $('#s-botToken').value,
           allowedUsers: $('#s-allowedUsers').value.trim(),
           allowedUserIds: $('#s-allowedUserIds').value.trim(),
+        },
+        discord: {
+          botToken: $('#s-discordBotToken').value,
+          allowedUsers: $('#s-discordAllowedUsers').value.trim(),
+          allowedUserIds: $('#s-discordAllowedUserIds').value.trim(),
+        },
+        slack: {
+          botToken: $('#s-slackBotToken').value,
+          appToken: $('#s-slackAppToken').value,
+          allowedUsers: $('#s-slackAllowedUsers').value.trim(),
+          allowedUserIds: $('#s-slackAllowedUserIds').value.trim(),
         },
         claudeCmd: $('#s-claudeCmd').value.trim() || 'claude',
         cursorCmd: $('#s-cursorCmd').value.trim() || 'cursor-agent',
