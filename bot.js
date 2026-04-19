@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { logger } = require('./lib/logger');
+const { startPolling: startGitHubPolling, stopPolling: stopGitHubPolling } = require('./platforms/github/polling');
 
 const config = require('./lib/config').get();
 if (config.errors.length) {
@@ -165,6 +166,7 @@ const server = createServer({
     discordRunning: !!currentDiscordBot,
     slackRunning: !!currentSlackApp,
     teamsRunning: !!currentTeamsAdapter,
+    githubPolling: require('./platforms/github/polling').isPolling(),
   }),
   restartPlatforms,
 }).listen(config.port, () => {
@@ -179,8 +181,14 @@ server.on('error', (err) => {
   throw err;
 });
 
-// Delay IMAP start slightly so DNS resolves cleanly after process startup
+// Delay IMAP and GitHub polling start slightly so DNS resolves cleanly after process startup
 setTimeout(startInboundListener, 3000);
+setTimeout(() => {
+  const cfg = require('./lib/config').get();
+  if (cfg.github?.token) {
+    startGitHubPolling(45000);
+  }
+}, 4000);
 
 let shuttingDown = false;
 function shutdown(reason) {
@@ -192,6 +200,7 @@ function shutdown(reason) {
   stopDiscordBot();
   stopSlackBot();
   stopTeamsBot();
+  stopGitHubPolling();
   server.close();
   stopInboundListener().catch(() => {});
   try { flushAll(); } catch (err) { logger.warn('flush failed', { err: err.message }); }

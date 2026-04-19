@@ -47,7 +47,7 @@ function createBot() {
    * Checks if the user is in the allowlist.
    */
   function isAllowed(userId, userName, cfg) {
-    const allowedUserIds = (cfg.github?.allowedUserIds || '').split(',').map(s => s.trim()).filter(Boolean);
+    const allowedUserIds = (cfg.github?.rawAllowedUserIds || '').split(',').map(s => s.trim()).filter(Boolean);
     const allowedUsers = (cfg.github?.allowedUsers || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 
     // Check ID first (O(1) if converted to Set, but for small lists it's fine)
