@@ -26,26 +26,26 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
         │
         ▼
   PromptBridge
-  ┌──────────────────────────────────────────────┐
-  │  Dashboard  ·  REST API                      │
-  │  ┌──────────┐  ┌──────────┐  ┌────────────┐ │
-  │  │ Telegram │  │ Discord  │  │  GitHub    │ │
-  │  │ Adapter  │  │ Adapter  │  │  Polling   │ │
-  │  └────┬─────┘  └────┬─────┘  └──────┬─────┘ │
-  │       │             │               │       │
-  │  ┌─────────┐  ┌──────────┐  ┌────────────┐  │
-  │  │  Slack  │  │   Teams  │  │   Email    │  │
-  │  │ Adapter │  │ Adapter  │  │  Adapter   │  │
-  │  └────┬────┘  └────┬─────┘  └────────┬───┘  │
-  │       └──────┬─────┴──────┬──────────┘      │
-  │        Dispatcher          │                │
-  │   (platform-agnostic)      │                │
-  └────────────────┬───────────────────────────┘
-                   │
-          ┌────────┴────────┐
-          │                 │
-     Claude Code         Cursor
-      (claude CLI)   (cursor-agent CLI)
+  ┌────────────────────────────────────┐
+  │  Dashboard  ·  REST API            │
+  │  ┌───────┐  ┌───────┐  ┌────────┐ │
+  │  │Telegram│ │Discord│  │ Slack  │ │
+  │  └────┬──┘  └────┬──┘  └───┬────┘ │
+  │       │          │         │      │
+  │  ┌───────┐  ┌───────┐  ┌────────┐ │
+  │  │ Teams │  │GitHub │  │ Email  │ │
+  │  │       │  │Polling│  │        │ │
+  │  └────┬──┘  └────┬──┘  └───┬────┘ │
+  │       │          │         │      │
+  │       └────┬─────┼─────┬───┘      │
+  │            Dispatcher             │
+  │        (platform-agnostic)        │
+  └─────────────┬────────────────────┘
+                │
+        ┌───────┴────────┐
+        │                │
+   Claude Code        Cursor
+    (claude CLI)   (cursor-agent CLI)
 </code></pre>
 </div>
 
