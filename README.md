@@ -19,33 +19,33 @@ Drive **Claude Code** and **Cursor** agents from **Telegram**, **Discord**, **Sl
 
 ## What is PromptBridge?
 
-PromptBridge lets you control AI coding agents from anywhere — your phone, Discord, Slack, Teams, your inbox, or a browser. Send a prompt via Telegram, Discord, Slack, Teams, or email, and get a full agent-powered response with file attachments, git diffs, and generated artifacts delivered back to you automatically.
+PromptBridge lets you control AI coding agents from anywhere — your phone, Discord, Slack, Teams, GitHub, your inbox, or a browser. Send a prompt via Telegram, Discord, Slack, Teams, GitHub issue/PR comments, or email, and get a full agent-powered response with file attachments, git diffs, and generated artifacts delivered back to you automatically.
 
 <div align="center">
-<pre><code>You (Telegram / Discord / Slack / Teams / Email)
+<pre><code>You (Telegram / Discord / Slack / Teams / GitHub / Email)
         │
         ▼
   PromptBridge
-  ┌─────────────────────────────────────────┐
-  │  Dashboard  ·  REST API                 │
-  │  ┌──────────┐  ┌──────────┐             │
-  │  │ Telegram │  │ Discord  │             │
-  │  │ Adapter  │  │ Adapter  │             │
-  │  └────┬─────┘  └────┬─────┘             │
-  │       │             │                  │
-  │  ┌─────────┐  ┌──────────┐  ┌────────┐ │
-  │  │  Slack  │  │   Teams  │  │ Email  │ │
-  │  │ Adapter │  │ Adapter  │  │Adapter │ │
-  │  └────┬────┘  └────┬─────┘  └───┬────┘ │
-  │       └──────┬─────┴──────┬─────┘      │
-  │        Dispatcher          │            │
-  │   (platform-agnostic)      │            │
-  └──────────────┬──────────────────────────┘
-                 │
-        ┌────────┴────────┐
-        │                 │
-   Claude Code         Cursor
-    (claude CLI)   (cursor-agent CLI)
+  ┌──────────────────────────────────────────────┐
+  │  Dashboard  ·  REST API                      │
+  │  ┌──────────┐  ┌──────────┐  ┌────────────┐ │
+  │  │ Telegram │  │ Discord  │  │  GitHub    │ │
+  │  │ Adapter  │  │ Adapter  │  │  Polling   │ │
+  │  └────┬─────┘  └────┬─────┘  └──────┬─────┘ │
+  │       │             │               │       │
+  │  ┌─────────┐  ┌──────────┐  ┌────────────┐  │
+  │  │  Slack  │  │   Teams  │  │   Email    │  │
+  │  │ Adapter │  │ Adapter  │  │  Adapter   │  │
+  │  └────┬────┘  └────┬─────┘  └────────┬───┘  │
+  │       └──────┬─────┴──────┬──────────┘      │
+  │        Dispatcher          │                │
+  │   (platform-agnostic)      │                │
+  └────────────────┬───────────────────────────┘
+                   │
+          ┌────────┴────────┐
+          │                 │
+     Claude Code         Cursor
+      (claude CLI)   (cursor-agent CLI)
 </code></pre>
 </div>
 
