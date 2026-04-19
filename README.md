@@ -10,7 +10,7 @@ Drive **Claude Code** and **Cursor** agents from **Telegram**, **Discord**, **Sl
 
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.17-brightgreen?logo=node.js)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platforms](https://img.shields.io/badge/Platforms-Telegram%20%7C%20Discord%20%7C%20Slack%20%7C%20Teams%20%7C%20Email-blueviolet)](#platforms)
+[![Platforms](https://img.shields.io/badge/Platforms-Telegram%20%7C%20Discord%20%7C%20Slack%20%7C%20Teams%20%7C%20GitHub%20%7C%20Email-blueviolet)](#platforms)
 [![Powered by Claude](https://img.shields.io/badge/Powered%20by-Claude%20Code-orange)](https://claude.ai/code)
 
 </div>
@@ -336,6 +336,7 @@ The reply arrives as a standard email with any generated files as attachments.
 | `TEAMS_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
 | `GITHUB_TOKEN` | No | — | Legacy — set in dashboard instead |
 | `GITHUB_WEBHOOK_SECRET` | No | — | Legacy — set in dashboard instead |
+| `GITHUB_ALLOWED_REPOS` | No | — | Legacy — set in dashboard instead |
 | `GITHUB_ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
 | `GITHUB_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
 
@@ -391,7 +392,8 @@ platforms/
     context.js                TeamsContext — adaptive cards + activity handling
     attachments.js            Teams attachment download helpers
   github/
-    index.js                  GitHub webhook listener — parses comments, routes commands
+    index.js                  GitHub webhook listener (optional) — parses comments, routes commands
+    polling.js                GitHub polling agent — polls allowed repos for /claude /cursor commands
     context.js                GitHubContext — posts responses as issue/PR comments
     attachments.js            GitHub attachment utilities
   email/

@@ -119,6 +119,7 @@ Every platform wraps its native event and implements `BotContext`:
 | GET | `/api/settings` | Runtime settings (SMTP pass masked) |
 | PUT | `/api/settings` | Update runtime settings |
 | POST | `/api/settings/email/test` | Test SMTP connection |
+| POST | `/api/settings/imap/test` | Test IMAP connection |
 | POST | `/api/run/email` | Trigger agent run + email result |
 
 ## Data files
@@ -157,3 +158,10 @@ Every platform wraps its native event and implements `BotContext`:
 | `GITHUB_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
 
 All settings including Telegram, Discord, Slack, Teams, and GitHub tokens + allowlists are configured via the dashboard Settings tab and stored in `data/settings.json`.
+
+### GitHub polling integration
+- **Polling-based** — no webhook setup required; bot automatically checks allowed repos every 120 seconds
+- **Config settings:** `github.token` (PAT), `github.allowedRepos` (comma-separated or empty for all public), `github.allowedUsers` (usernames), `github.allowedUserIds` (numeric IDs)
+- **allowedRepos format:** array of strings like `["owner/repo", "owner/repo2"]` — parsed from comma-separated string in dashboard or `.env` `GITHUB_ALLOWED_REPOS`
+- **Lifecycle:** polling starts automatically 4s after bot startup; stops cleanly on shutdown
+- **Rate limiting:** respects GitHub's 30 req/min search API limit by checking every 120s; for multiple repos, specifying allowedRepos keeps queries efficient
