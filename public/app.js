@@ -8,22 +8,24 @@
       const el = $('#toast');
       const textSpan = el.querySelector('.toast-text');
       const icon = el.querySelector('i');
-      
+
       textSpan.textContent = msg;
       el.className = 'toast show ' + (kind === 'error' ? 'error' : kind === 'ok' ? 'ok' : '');
-      
+
       // Update icon based on kind
-      if(kind === 'ok') {
-        icon.setAttribute('data-lucide', 'check-circle-2'); 
-        icon.style.color = 'var(--success)';
-      } else if (kind === 'error') {
-        icon.setAttribute('data-lucide', 'alert-circle');
-        icon.style.color = 'var(--danger)';
-      } else {
-        icon.setAttribute('data-lucide', 'info');
-        icon.style.color = 'var(--text-main)';
+      if(icon) {
+        if(kind === 'ok') {
+          icon.setAttribute('data-lucide', 'check-circle-2');
+          icon.style.color = 'var(--success)';
+        } else if (kind === 'error') {
+          icon.setAttribute('data-lucide', 'alert-circle');
+          icon.style.color = 'var(--danger)';
+        } else {
+          icon.setAttribute('data-lucide', 'info');
+          icon.style.color = 'var(--text-main)';
+        }
+        lucide.createIcons(); // Re-render icon
       }
-      lucide.createIcons(); // Re-render icon
 
       clearTimeout(showToast._t);
       showToast._t = setTimeout(() => el.classList.remove('show'), 3000);

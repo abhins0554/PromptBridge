@@ -26,20 +26,21 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
         │
         ▼
   PromptBridge
-  ┌─────────────────────────────────┐
-  │  Dashboard  ·  REST API         │
-  │  ┌──────────┐  ┌──────────┐     │
-  │  │ Telegram │  │ Discord  │     │
-  │  │ Adapter  │  │ Adapter  │     │
-  │  └────┬─────┘  └────┬─────┘     │
-  │  ┌─────────────┐     │          │
-  │  │    Email    │     │          │
-  │  │   Adapter   │     │          │
-  │  └──────┬──────┘     │          │
-  │       └──────┬───────┴────────┐ │
-  │        Dispatcher               │
-  │   (platform-agnostic core)      │
-  └──────────────┬──────────────────┘
+  ┌──────────────────────────────────────┐
+  │  Dashboard  ·  REST API              │
+  │  ┌──────────┐  ┌──────────┐          │
+  │  │ Telegram │  │ Discord  │          │
+  │  │ Adapter  │  │ Adapter  │          │
+  │  └────┬─────┘  └────┬─────┘          │
+  │       │             │                │
+  │  ┌─────────┐  ┌──────────┐           │
+  │  │  Slack  │  │  Email   │           │
+  │  │ Adapter │  │ Adapter  │           │
+  │  └────┬────┘  └────┬─────┘           │
+  │       └──────┬─────┴────────────┐    │
+  │        Dispatcher                │
+  │   (platform-agnostic core)       │
+  └──────────────┬────────────────────┘
                  │
         ┌────────┴────────┐
         │                 │
@@ -113,6 +114,15 @@ npm run dev        # development — auto-restarts on file changes
 4. Paste your bot token and allowed usernames or user IDs
 5. Click **Save Settings** — the client connects and registers slash commands
 
+### Set up Slack
+
+1. Create a Slack app from scratch in the [Slack API dashboard](https://api.slack.com/apps)
+2. Enable **Socket Mode** and generate an **App Token** (`xapp-...`)
+3. Add **Bot Token Scopes**: `chat:write`, `files:write`, `app_mentions:read`, `message.*:read`
+4. Open **http://localhost:3000** → **Settings** tab → **Slack App** section
+5. Paste your **Bot Token** and **App Token**, and add allowed usernames or user IDs
+6. Click **Save Settings** — Socket Mode connects and listens for interactions
+
 ---
 
 ## Dashboard
@@ -124,7 +134,7 @@ The dashboard is the primary configuration interface. All runtime settings are s
 | **Projects** | Add, edit, delete project directories with agent + model settings |
 | **Email Run** | Trigger an agent run from the browser and receive the response by email |
 | **Sessions** | View and clear per-chat conversation sessions |
-| **Settings** | Telegram + Discord bot tokens and allowlists, agent executables, Claude permission mode, SMTP/IMAP for email |
+| **Settings** | Telegram, Discord, Slack bot tokens and allowlists; agent executables; Claude permission mode; SMTP/IMAP for email |
 
 ---
 
@@ -165,6 +175,25 @@ Use slash commands with the same command surface as Telegram:
 | `/help` | Show help |
 
 Plain channel messages run the active project's agent. Send attachments with a `/claude` or `/cursor` message to have the agent read them from disk.
+
+### Slack
+
+Slack uses **message-based interactions** via Socket Mode. Send commands as regular messages in channels or DMs:
+
+| Command | Description |
+|---------|-------------|
+| `/claude <prompt>` | Ask Claude Code anything |
+| `/cursor <prompt>` | Ask Cursor agent anything |
+| `/projects` | List and switch active project |
+| `/use <project>` | Activate a project for the current channel |
+| `/current` | Show active project and session ID |
+| `/model` | Switch model for Q&A or active project |
+| `/reset` | Clear session history |
+| `/cancel` | Abort a running agent |
+| `/dashboard` | Dashboard URL |
+| `/help` | Show help |
+
+Send messages with file attachments; the agent will read them from disk. Responses include any generated files as attachments.
 
 ### Email
 
@@ -225,15 +254,22 @@ The reply arrives as a standard email with any generated files as attachments.
 | `DISCORD_BOT_TOKEN` | No | — | Legacy — set in dashboard instead |
 | `DISCORD_ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
 | `DISCORD_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
+| `SLACK_BOT_TOKEN` | No | — | Legacy — set in dashboard instead |
+| `SLACK_APP_TOKEN` | No | — | Legacy — set in dashboard instead |
+| `SLACK_ALLOWED_USERS` | No | — | Legacy — set in dashboard instead |
+| `SLACK_ALLOWED_USER_IDS` | No | — | Legacy — set in dashboard instead |
 
 ### Dashboard settings (stored in `data/settings.json`)
 
 | Setting | Description |
 |---------|-------------|
 | Telegram bot token | From [@BotFather](https://t.me/BotFather) |
-| Allowed usernames / user IDs | Allowlist for Telegram access |
+| Telegram allowlist | Usernames/user IDs for Telegram access |
 | Discord bot token | From the Discord developer portal |
-| Discord usernames / user IDs | Allowlist for Discord access |
+| Discord allowlist | Usernames/user IDs for Discord access |
+| Slack bot token | Bot User OAuth Token (`xoxb-...`) from Slack app |
+| Slack app token | Socket Mode App Token (`xapp-...`) from Slack app |
+| Slack allowlist | Usernames/user IDs for Slack access |
 | Claude executable | Path to `claude` CLI (default: `claude`) |
 | Cursor executable | Path to `cursor-agent` CLI (default: `cursor-agent`) |
 | Permission mode | `bypassPermissions` / `acceptEdits` / `plan` / `default` |
@@ -260,6 +296,10 @@ platforms/
     index.js                  Discord client setup + slash commands
     context.js                DiscordContext / DiscordInteractionContext
     attachments.js            Discord attachment download helpers
+  slack/
+    index.js                  Slack Bolt Socket Mode app setup
+    context.js                SlackContext — message + interaction handling
+    attachments.js            Slack attachment download helpers
   email/
     index.js                  EmailContext — buffers messages → sends one email
     inbound.js                IMAP listener — real-time email monitoring

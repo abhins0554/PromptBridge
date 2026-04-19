@@ -127,5 +127,12 @@ Every platform wraps its native event and implements `BotContext`:
 | `BOT_TOKEN` | No | — | Legacy fallback — set in dashboard instead |
 | `ALLOWED_USERS` | No | — | Legacy fallback — set in dashboard instead |
 | `ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
+| `DISCORD_BOT_TOKEN` | No | — | Legacy fallback — set in dashboard instead |
+| `DISCORD_ALLOWED_USERS` | No | — | Legacy fallback — set in dashboard instead |
+| `DISCORD_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
+| `SLACK_BOT_TOKEN` | No | — | Legacy fallback — set in dashboard instead |
+| `SLACK_APP_TOKEN` | No | — | Legacy fallback — set in dashboard instead |
+| `SLACK_ALLOWED_USERS` | No | — | Legacy fallback — set in dashboard instead |
+| `SLACK_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
 
-All settings including Telegram token and allowlist are configured via the dashboard Settings tab and stored in `data/settings.json`.
+All settings including Telegram, Discord, and Slack tokens + allowlists are configured via the dashboard Settings tab and stored in `data/settings.json`.
