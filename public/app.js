@@ -363,7 +363,7 @@
         // GitHub
         const gh = s.github || {};
         $('#s-githubToken').value = gh.token || '';
-        $('#s-githubWebhookSecret').value = gh.webhookSecret || '';
+        $('#s-githubAllowedRepos').value = gh.allowedRepos || '';
         $('#s-githubAllowedUsers').value = gh.allowedUsers || '';
         $('#s-githubAllowedUserIds').value = gh.allowedUserIds || '';
 
@@ -428,7 +428,7 @@
         },
         github: {
           token: $('#s-githubToken').value,
-          webhookSecret: $('#s-githubWebhookSecret').value,
+          allowedRepos: $('#s-githubAllowedRepos').value.trim(),
           allowedUsers: $('#s-githubAllowedUsers').value.trim(),
           allowedUserIds: $('#s-githubAllowedUserIds').value.trim(),
         },

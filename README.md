@@ -139,18 +139,17 @@ npm run dev        # development — auto-restarts on file changes
 ### Set up GitHub
 
 1. Create a Personal Access Token at [github.com/settings/tokens/new](https://github.com/settings/tokens/new)
-   - Scope: `repo` for private repos, `public_repo` for public repos
+   - Scope: `repo` for private repos, `public_repo` for public repos only
 2. Open **http://localhost:3000** → **Settings** tab → **GitHub Integration** section
 3. Paste your PAT in **Personal Access Token (PAT)** field
-4. (Optional) Set a webhook secret for signature verification
-5. Add allowed GitHub usernames or user IDs (leave blank to allow all)
-6. Click **Save Settings**
-7. In GitHub, add a webhook to your repo:
-   - **Payload URL**: `https://your-domain.com/api/github/webhook`
-   - **Content type**: `application/json`
-   - **Events**: `Issues`, `Pull requests` (to get comments)
-   - (Optional) **Secret**: enter the same secret from step 4
-8. Users can now mention `/claude` in issue/PR comments, and the bot will respond
+4. (Optional) List allowed repositories to poll — comma-separated format: `owner/repo, owner/repo2`
+   - Leave blank to search all public repos (not recommended for rate limits)
+   - For efficiency with GitHub's search rate limit (30 req/min), specify your repos
+5. Add allowed GitHub usernames or user IDs (leave blank to allow all users)
+6. Click **Save Settings** — polling starts automatically (checks every 120 seconds)
+7. Users can now mention `/claude` or `/cursor` in issue/PR comments, and the bot will respond within 2 minutes
+
+**Note:** GitHub integration uses polling (no webhook setup needed). Every 2 minutes, the bot searches your allowed repos for `/claude` or `/cursor` mentions in issue/PR comments and responds directly.
 
 ---
 
@@ -245,25 +244,28 @@ Teams supports **adaptive card buttons** for interactive menus. Send files with 
 
 ### GitHub
 
-Mention `/claude` or `/cursor` in **issue comments** or **pull request comments** to trigger the agent. The bot responds directly to the same issue/PR:
+Mention `/claude` or `/cursor` in **issue comments** or **pull request comments** to trigger the agent. The bot responds directly to the same issue/PR via polling (every 120 seconds):
 
 | Command | Description |
 |---------|-------------|
-| `/claude <prompt>` | Ask Claude Code in an issue/PR |
-| `/cursor <prompt>` | Ask Cursor agent in an issue/PR |
+| `/claude <prompt>` | Ask Claude Code in an issue/PR comment |
+| `/cursor <prompt>` | Ask Cursor agent in an issue/PR comment |
 | `/help` | Show available commands |
 
-**Example:** In an issue comment, type:
+**Example:** In a pull request comment, type:
 ```
-/claude fix this bug. Look at the error in the logs and implement a solution.
+/claude please analyze this code and suggest improvements
 ```
 
 The bot will:
-1. Fetch the issue description and all previous comments
-2. Run Claude with the full context
-3. Post the solution as a reply comment
+1. Poll the repo every 2 minutes for your `/claude` or `/cursor` mentions
+2. Fetch the issue/PR description and all comments
+3. Run Claude/Cursor with the full context
+4. Post the response as a reply comment on the same issue/PR
 
-**Session awareness:** The bot maintains conversation state per issue/PR, so follow-up `/claude` commands in the same issue include all previous context.
+**Polling:** The bot checks allowed repos every 120 seconds. Specify repos in Settings → GitHub Integration → Allowed Repositories to optimize API rate limits.
+
+**Session awareness:** The bot maintains conversation state per issue/PR, so follow-up `/claude` commands in the same thread include all previous context.
 
 ### Email
 
@@ -352,8 +354,8 @@ The reply arrives as a standard email with any generated files as attachments.
 | Teams app password | Microsoft Bot Framework App Password (client secret) |
 | Teams allowlist | Usernames/user IDs for Teams access |
 | GitHub PAT | Personal Access Token with `repo` scope from github.com/settings/tokens |
-| GitHub webhook secret | (Optional) Secret for webhook signature verification |
-| GitHub allowlist | Usernames/user IDs for GitHub access |
+| GitHub allowed repos | Comma-separated repos to poll (e.g., `owner/repo, owner/repo2`); leave blank for all public repos |
+| GitHub allowlist | Usernames/user IDs for GitHub access (leave blank to allow all) |
 | Claude executable | Path to `claude` CLI (default: `claude`) |
 | Cursor executable | Path to `cursor-agent` CLI (default: `cursor-agent`) |
 | Permission mode | `bypassPermissions` / `acceptEdits` / `plan` / `default` |

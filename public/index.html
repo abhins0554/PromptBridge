@@ -168,32 +168,20 @@
 
         <!-- ── Settings Panel ──────────────────────────────────────────────── -->
         <div id="panel-settings" class="panel">
-          
-          <div id="tg-unconfigured" class="auth-banner" style="display:none;">
-            <div style="display:flex; align-items:center; gap: 8px; font-weight:600;"><i data-lucide="alert-triangle" style="width:18px;"></i> Telegram Not Configured</div>
-            <span style="color: rgba(255,255,255,0.7);">Bot missing token — the Telegram bot will not start until you save a valid token below.</span>
-          </div>
+          <form id="settings-form">
 
-          <div id="discord-unconfigured" class="auth-banner" style="display:none;">
-            <div style="display:flex; align-items:center; gap: 8px; font-weight:600;"><i data-lucide="alert-triangle" style="width:18px;"></i> Discord Not Configured</div>
-            <span style="color: rgba(255,255,255,0.7);">Bot missing token — the Discord client will not start until you save a valid token below.</span>
-          </div>
-
-          <div id="slack-unconfigured" class="auth-banner" style="display:none;">
-            <div style="display:flex; align-items:center; gap: 8px; font-weight:600;"><i data-lucide="alert-triangle" style="width:18px;"></i> Slack Not Configured</div>
-            <span style="color: rgba(255,255,255,0.7);">Socket Mode app token and bot token are both required before the Slack app can start.</span>
-          </div>
-
-          <div class="card">
-            <h2><i data-lucide="sliders-horizontal" style="width:20px;"></i> Core Configuration</h2>
-            <form id="settings-form">
-              
-              <h3>Telegram Bot</h3>
+            <!-- ── Telegram ──────────────────────────────────────────────────── -->
+            <div class="card">
+              <div id="tg-unconfigured" class="auth-banner" style="display:none; margin-bottom: 16px;">
+                <div style="display:flex; align-items:center; gap: 8px; font-weight:600;"><i data-lucide="alert-triangle" style="width:18px;"></i> Not Configured</div>
+                <span style="color: rgba(255,255,255,0.7);">Bot missing token — the bot will not start until you save a valid token.</span>
+              </div>
+              <h2><i data-lucide="send" style="width:20px;"></i> Telegram</h2>
               <label for="s-botToken">Bot Token</label>
               <input id="s-botToken" type="password" placeholder="1234567890:ABCdef..." autocomplete="new-password">
               <div class="help">Get token from <a href="https://t.me/BotFather" target="_blank" style="color:var(--accent);">@BotFather</a>. Saving auto-restarts the bot.</div>
 
-              <div class="grid2" style="margin-top:8px;">
+              <div class="grid2" style="margin-top:16px;">
                 <div>
                   <label for="s-allowedUsers">Allowed Usernames</label>
                   <input id="s-allowedUsers" placeholder="alice, bob" autocomplete="off">
@@ -205,13 +193,20 @@
                   <div class="help">Numeric Telegram IDs.</div>
                 </div>
               </div>
+            </div>
 
-              <h3>Discord Bot</h3>
+            <!-- ── Discord ───────────────────────────────────────────────────── -->
+            <div class="card">
+              <div id="discord-unconfigured" class="auth-banner" style="display:none; margin-bottom: 16px;">
+                <div style="display:flex; align-items:center; gap: 8px; font-weight:600;"><i data-lucide="alert-triangle" style="width:18px;"></i> Not Configured</div>
+                <span style="color: rgba(255,255,255,0.7);">Bot missing token — the client will not start until you save a valid token.</span>
+              </div>
+              <h2><i data-lucide="message-circle" style="width:20px;"></i> Discord</h2>
               <label for="s-discordBotToken">Bot Token</label>
               <input id="s-discordBotToken" type="password" placeholder="Discord bot token" autocomplete="new-password">
               <div class="help">Create an application in the Discord developer portal and enable the Message Content intent. Saving auto-restarts the client.</div>
 
-              <div class="grid2" style="margin-top:8px;">
+              <div class="grid2" style="margin-top:16px;">
                 <div>
                   <label for="s-discordAllowedUsers">Allowed Usernames</label>
                   <input id="s-discordAllowedUsers" placeholder="alice, bob" autocomplete="off">
@@ -223,8 +218,15 @@
                   <div class="help">Numeric Discord user IDs.</div>
                 </div>
               </div>
+            </div>
 
-              <h3>Slack App</h3>
+            <!-- ── Slack ──────────────────────────────────────────────────────── -->
+            <div class="card">
+              <div id="slack-unconfigured" class="auth-banner" style="display:none; margin-bottom: 16px;">
+                <div style="display:flex; align-items:center; gap: 8px; font-weight:600;"><i data-lucide="alert-triangle" style="width:18px;"></i> Not Configured</div>
+                <span style="color: rgba(255,255,255,0.7);">Socket Mode app token and bot token are both required before the app can start.</span>
+              </div>
+              <h2><i data-lucide="hash" style="width:20px;"></i> Slack</h2>
               <div class="grid2">
                 <div>
                   <label for="s-slackBotToken">Bot Token</label>
@@ -238,7 +240,7 @@
                 </div>
               </div>
 
-              <div class="grid2" style="margin-top:8px;">
+              <div class="grid2" style="margin-top:16px;">
                 <div>
                   <label for="s-slackAllowedUsers">Allowed Usernames</label>
                   <input id="s-slackAllowedUsers" placeholder="alice, bob" autocomplete="off">
@@ -250,17 +252,20 @@
                   <div class="help">Slack user IDs are the most reliable allowlist key.</div>
                 </div>
               </div>
+            </div>
 
-              <h3>GitHub Integration</h3>
+            <!-- ── GitHub ─────────────────────────────────────────────────────── -->
+            <div class="card">
+              <h2><i data-lucide="github" style="width:20px;"></i> GitHub</h2>
               <label for="s-githubToken">Personal Access Token (PAT)</label>
               <input id="s-githubToken" type="password" placeholder="ghp_..." autocomplete="new-password">
-              <div class="help">GitHub PAT with <code>repo</code> scope for private repos. Get one at <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a>. Falls back to <code>GITHUB_TOKEN</code> env var if blank.</div>
+              <div class="help">GitHub PAT with <code>repo</code> scope for private repos. Get one at <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a>.</div>
 
-              <label for="s-githubWebhookSecret">Webhook Secret <span style="color:#6a6a75;">(optional)</span></label>
-              <input id="s-githubWebhookSecret" type="password" placeholder="webhook-secret-key" autocomplete="off">
-              <div class="help">Set this in your GitHub webhook settings for signature verification. If not set, webhooks will be accepted from any source.</div>
+              <label for="s-githubAllowedRepos" style="margin-top: 16px;">Allowed Repositories</label>
+              <input id="s-githubAllowedRepos" placeholder="owner/repo, owner/repo2" autocomplete="off">
+              <div class="help">Comma-separated. Leave blank to search all public repos. For polling efficiency, list specific repos.</div>
 
-              <div class="grid2" style="margin-top:8px;">
+              <div class="grid2" style="margin-top:16px;">
                 <div>
                   <label for="s-githubAllowedUsers">Allowed Usernames</label>
                   <input id="s-githubAllowedUsers" placeholder="alice, bob" autocomplete="off">
@@ -272,46 +277,17 @@
                   <div class="help">Numeric GitHub user IDs.</div>
                 </div>
               </div>
+            </div>
 
-              <h3>Local Agents</h3>
-              <div class="grid2">
-                <div>
-                  <label for="s-claudeCmd">Claude Executable path</label>
-                  <input id="s-claudeCmd" placeholder="claude" autocomplete="off">
-                </div>
-                <div>
-                  <label for="s-cursorCmd">Cursor Executable path</label>
-                  <input id="s-cursorCmd" placeholder="cursor-agent" autocomplete="off">
-                </div>
-              </div>
-
-              <div class="grid2">
-                <div>
-                  <label for="s-permissionMode">Claude Permission Mode</label>
-                  <select id="s-permissionMode">
-                    <option value="bypassPermissions">bypassPermissions (default)</option>
-                    <option value="acceptEdits">acceptEdits</option>
-                    <option value="plan">plan</option>
-                    <option value="default">default</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="s-agentTimeoutMs">Agent Timeout (minutes)</label>
-                  <input id="s-agentTimeoutMs" type="number" min="1" max="360" placeholder="60">
-                </div>
-              </div>
-
-              <label for="s-freeformCwd">Q&amp;A Scratch Directory</label>
-              <input id="s-freeformCwd" placeholder="Leave blank for default (data/scratch)" autocomplete="off">
-              <div class="help">Default working directory for freeform Q&A commands.</div>
-
-              <h3>Email Delivery (Outbound SMTP)</h3>
+            <!-- ── Email (SMTP) ───────────────────────────────────────────────── -->
+            <div class="card">
+              <h2><i data-lucide="mail" style="width:20px;"></i> Email - Outbound (SMTP)</h2>
               <div class="toggle-row">
                 <input id="s-emailEnabled" type="checkbox">
                 <label for="s-emailEnabled" style="font-weight: 500;">Enable email response delivery</label>
               </div>
 
-              <div id="smtp-fields" style="display:none; margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.1); border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+              <div id="smtp-fields" style="display:none; margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.1); border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
                 <div class="grid2">
                   <div>
                     <label for="s-smtpHost" style="margin-top:0;">SMTP Host</label>
@@ -348,14 +324,17 @@
                   <button type="button" class="ghost" id="test-smtp"><i data-lucide="mail-check" style="width:16px;"></i> Test SMTP</button>
                 </div>
               </div>
+            </div>
 
-              <h3>Email Triggers (Inbound IMAP)</h3>
+            <!-- ── Email (IMAP) ───────────────────────────────────────────────── -->
+            <div class="card">
+              <h2><i data-lucide="inbox" style="width:20px;"></i> Email - Inbound (IMAP)</h2>
               <div class="toggle-row">
                 <input id="s-inboundEnabled" type="checkbox">
                 <label for="s-inboundEnabled" style="font-weight: 500;">Enable inbound email listener</label>
               </div>
 
-              <div id="imap-fields" style="display:none; margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.1); border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+              <div id="imap-fields" style="display:none; margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.1); border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
                 <div class="grid2">
                   <div>
                     <label for="s-imapHost" style="margin-top:0;">IMAP Host</label>
@@ -385,22 +364,58 @@
                 </div>
               </div>
 
-              <h3>Email Access Control</h3>
-              <label for="s-allowedEmails">Permitted Sender Emails</label>
+              <label for="s-allowedEmails" style="margin-top: 16px;">Permitted Sender Emails</label>
               <textarea id="s-allowedEmails" placeholder="alice@company.com, admin@domain.com" style="min-height:80px;"></textarea>
               <div class="help">Comma-separated. Essential for security to prevent unauthorized code execution.</div>
+            </div>
 
-              <div class="row" style="margin-top:32px; border-top: 1px solid var(--glass-border); padding-top: 24px;">
-                <button type="submit"><i data-lucide="check" style="width:16px;"></i> Apply Settings Defaults</button>
+            <!-- ── Local Agents ───────────────────────────────────────────────── -->
+            <div class="card">
+              <h2><i data-lucide="cpu" style="width:20px;"></i> Local Agents</h2>
+              <div class="grid2">
+                <div>
+                  <label for="s-claudeCmd">Claude Executable Path</label>
+                  <input id="s-claudeCmd" placeholder="claude" autocomplete="off">
+                </div>
+                <div>
+                  <label for="s-cursorCmd">Cursor Executable Path</label>
+                  <input id="s-cursorCmd" placeholder="cursor-agent" autocomplete="off">
+                </div>
               </div>
-            </form>
-          </div>
-          
+
+              <div class="grid2" style="margin-top:16px;">
+                <div>
+                  <label for="s-permissionMode">Claude Permission Mode</label>
+                  <select id="s-permissionMode">
+                    <option value="bypassPermissions">bypassPermissions (default)</option>
+                    <option value="acceptEdits">acceptEdits</option>
+                    <option value="plan">plan</option>
+                    <option value="default">default</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="s-agentTimeoutMs">Agent Timeout (minutes)</label>
+                  <input id="s-agentTimeoutMs" type="number" min="1" max="360" placeholder="60">
+                </div>
+              </div>
+
+              <label for="s-freeformCwd" style="margin-top: 16px;">Q&amp;A Scratch Directory</label>
+              <input id="s-freeformCwd" placeholder="Leave blank for default (data/scratch)" autocomplete="off">
+              <div class="help">Default working directory for freeform Q&A commands.</div>
+            </div>
+
+            <!-- ── Save Button ────────────────────────────────────────────────── -->
+            <div class="row" style="margin-top:32px;">
+              <button type="submit"><i data-lucide="check" style="width:16px;"></i> Apply Settings</button>
+            </div>
+          </form>
+
+          <!-- ── Environment Variables (Read-only) ─────────────────────────── -->
           <div class="card" style="background: rgba(0,0,0,0.2);">
             <h2 style="font-size: 14px; margin-bottom: 12px; color: var(--text-muted);"><i data-lucide="file-code-2" style="width:16px;"></i> Environment Override (.env)</h2>
-            <p style="font-size:13px;color:var(--text-muted);margin:0;line-height:1.5;">Values hardcoded in system environment variables (.env file). Adjust via dashboard if configured, else restart server required to effect changes.</p>
+            <p style="font-size:13px;color:var(--text-muted);margin:0;line-height:1.5;">Values hardcoded in system environment variables. Adjust via dashboard if configured, else restart server required.</p>
             <table style="margin-top:16px;">
-              <tr><th style="padding: 8px 12px; font-size:11px;">Environment Key</th><th style="padding: 8px 12px; font-size:11px;">Status value</th></tr>
+              <tr><th style="padding: 8px 12px; font-size:11px;">Environment Key</th><th style="padding: 8px 12px; font-size:11px;">Status</th></tr>
               <tr><td style="padding: 8px 12px;"><code>PORT</code></td><td style="padding: 8px 12px;"><span id="ro-port" style="color:var(--text-muted);">—</span></td></tr>
               <tr><td style="padding: 8px 12px;"><code>DASHBOARD_TOKEN</code></td><td style="padding: 8px 12px;"><span id="ro-dashToken" style="color:var(--text-muted);">—</span></td></tr>
             </table>

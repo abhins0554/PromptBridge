@@ -186,7 +186,8 @@ setTimeout(startInboundListener, 3000);
 setTimeout(() => {
   const cfg = require('./lib/config').get();
   if (cfg.github?.token) {
-    startGitHubPolling(45000);
+    // 120 second interval to avoid GitHub API search rate limits
+    startGitHubPolling(120000);
   }
 }, 4000);
 

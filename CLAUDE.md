@@ -31,7 +31,8 @@ platforms/
     context.js                TeamsContext — adaptive cards + activity handling
     attachments.js            Teams attachment download helpers
   github/
-    index.js                  GitHub webhook listener — parses comments, routes commands
+    index.js                  GitHub webhook listener (optional) — parses comments, routes commands
+    polling.js                GitHub polling agent — polls allowed repos for /claude /cursor commands
     context.js                GitHubContext — posts responses as issue/PR comments
     attachments.js            GitHub attachment utilities (stub)
   email/
@@ -80,9 +81,9 @@ Every platform wraps its native event and implements `BotContext`:
 - Discord token/allowlist: `settings.json` takes precedence; `.env` DISCORD_BOT_TOKEN / DISCORD_ALLOWED_USERS / DISCORD_ALLOWED_USER_IDS still work as legacy fallback
 - Slack token/allowlist: `settings.json` takes precedence; `.env` SLACK_BOT_TOKEN / SLACK_APP_TOKEN / SLACK_ALLOWED_USERS / SLACK_ALLOWED_USER_IDS still work as legacy fallback
 - Teams token/allowlist: `settings.json` takes precedence; `.env` TEAMS_APP_ID / TEAMS_APP_PASSWORD / TEAMS_ALLOWED_USERS / TEAMS_ALLOWED_USER_IDS still work as legacy fallback
-- GitHub token/allowlist: `settings.json` takes precedence; `.env` GITHUB_TOKEN / GITHUB_WEBHOOK_SECRET / GITHUB_ALLOWED_USERS / GITHUB_ALLOWED_USER_IDS still work as legacy fallback
+- GitHub token/allowlist/repos: `settings.json` takes precedence; `.env` GITHUB_TOKEN / GITHUB_WEBHOOK_SECRET / GITHUB_ALLOWED_REPOS / GITHUB_ALLOWED_USERS / GITHUB_ALLOWED_USER_IDS still work as legacy fallback
 - Settings edited via dashboard → `PUT /api/settings` → `saveSettings()` + `reloadConfig()` + auto-restart Telegram/Discord/Slack/Teams clients if bot settings changed
-- GitHub webhook is stateless — no polling or client connection needed, just HTTP webhooks to `/api/github/webhook`
+- GitHub polling: every 120s checks allowed repos for `/claude` or `/cursor` commands in issue/PR comments; no webhook setup needed, uses only PAT token
 - `config.get()` has a 3-second TTL so changes propagate automatically
 - `runner.js` calls `require('./config').get()` fresh inside each `runClaude`/`runCursor` call
 
@@ -151,6 +152,7 @@ Every platform wraps its native event and implements `BotContext`:
 | `TEAMS_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
 | `GITHUB_TOKEN` | No | — | Legacy fallback — set in dashboard instead |
 | `GITHUB_WEBHOOK_SECRET` | No | — | Legacy fallback — set in dashboard instead |
+| `GITHUB_ALLOWED_REPOS` | No | — | Legacy fallback — set in dashboard instead |
 | `GITHUB_ALLOWED_USERS` | No | — | Legacy fallback — set in dashboard instead |
 | `GITHUB_ALLOWED_USER_IDS` | No | — | Legacy fallback — set in dashboard instead |
 
