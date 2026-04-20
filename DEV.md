@@ -1,17 +1,31 @@
 # PromptBridge Development
 
-## Running the Electron App (Dev Mode)
+## Running the Electron App
 
-### Quick Start
+### Built Executable (Recommended)
 
 ```bash
-npm run electron:dev
+npm run build:win
+C:\Users\Abhishek\Desktop\telegram-bot\dist\PromptBridge-Setup-2.0.0.exe
 ```
 
-This launches:
-1. **Electron window** with control panel (tray + UI)
-2. **Express dashboard** on `http://localhost:3000`
-3. **All bot platforms** (Telegram, Discord, Slack, Teams, Email, GitHub)
+This is the recommended way to test the Electron app. The built executable bundles Node.js and Electron properly and works on any machine without dev environment dependencies.
+
+### Dev Mode
+
+⚠️ **Note**: `npm run electron:dev` has issues on Windows with Electron's module loading in the dev environment. The app is ready for production use via `npm run build:win`.
+
+For development on the CLI bot (without Electron UI):
+
+```bash
+npm start
+```
+
+or with watch mode:
+
+```bash
+npm run dev
+```
 
 ### If Port 3000 Is In Use
 
