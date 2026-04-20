@@ -8,10 +8,11 @@
     "start": "node bot.js",
     "electron": "electron .",
     "electron:dev": "cross-env NODE_ENV=development electron .",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux",
-    "build": "electron-builder --win --mac --linux"
+    "prebuild": "node -e \"const fs = require('fs'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.png'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.ico'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.icns'); console.log('Icons prepared from logo.png');\"",
+    "build:win": "npm run prebuild && electron-builder --win",
+    "build:mac": "npm run prebuild && electron-builder --mac",
+    "build:linux": "npm run prebuild && electron-builder --linux",
+    "build": "npm run prebuild && electron-builder --win --mac --linux"
   },
   "postinstall": "electron-builder install-app-deps",
   "engines": {
