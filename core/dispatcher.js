@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { projects, sessions } = require('../lib/store');
-const { runClaude, runCursor } = require('../lib/runner');
+const { runClaude, runCursor, runCodex } = require('../lib/runner');
 const { snapshot, diffFromSnapshot, collectArtifacts } = require('../lib/changes');
 const { truncate, formatSize } = require('../lib/format');
 const { make } = require('../lib/logger');
@@ -37,6 +37,7 @@ function helpText() {
     '**Ask (no project needed)**',
     '• `/claude <prompt>` — ask Claude Code anything',
     '• `/cursor <prompt>` — ask Cursor agent anything',
+    '• `/codex <prompt>` — ask Codex anything',
     '',
     '**Project work**',
     "• `/projects` — list & switch",
@@ -62,10 +63,12 @@ function buildModelMenu(chatId) {
   const p = s.projectId ? projects.get(s.projectId) : null;
   const fcl = sessions.getFreeformModel(chatId, 'claude');
   const fcu = sessions.getFreeformModel(chatId, 'cursor');
+  const fco = sessions.getFreeformModel(chatId, 'codex');
 
   const lines = ['**🎛 Model settings**', ''];
   lines.push(`• Q&A Claude: \`${fcl || 'default'}\``);
   lines.push(`• Q&A Cursor: \`${fcu || 'default'}\``);
+  lines.push(`• Q&A Codex: \`${fco || 'default'}\``);
   if (p) {
     lines.push(`• Project **${p.name}** [${p.agent}]: \`${p.model || 'default'}\``);
   } else {
@@ -76,6 +79,7 @@ function buildModelMenu(chatId) {
     [
       { label: '🤖 Q&A Claude ▾', id: 'm:pick:fcl' },
       { label: '🤖 Q&A Cursor ▾', id: 'm:pick:fcu' },
+      { label: '🤖 Q&A Codex ▾', id: 'm:pick:fco' },
     ],
   ];
   if (p) buttons.push([{ label: `📁 Project "${truncate(p.name, 16)}" ▾`, id: 'm:pick:proj' }]);
@@ -109,6 +113,7 @@ function buildProjectsMenu(chatId) {
 function getScopePresets(chatId, scope) {
   if (scope === 'fcl') return presetsFor('claude');
   if (scope === 'fcu') return presetsFor('cursor');
+  if (scope === 'fco') return presetsFor('codex');
   if (scope === 'proj') {
     const s = sessions.get(chatId);
     const p = s.projectId ? projects.get(s.projectId) : null;
@@ -120,6 +125,7 @@ function getScopePresets(chatId, scope) {
 function scopeLabel(scope) {
   if (scope === 'fcl') return 'Q&A Claude';
   if (scope === 'fcu') return 'Q&A Cursor';
+  if (scope === 'fco') return 'Q&A Codex';
   return 'active project';
 }
 
@@ -178,6 +184,8 @@ function createProgressTracker(ctx, messageId, agent, scope) {
         }
       } else if (ev.kind === 'cursor_lines') {
         latestText = `cursor streaming (${ev.count} lines)`;
+      } else if (ev.kind === 'codex_lines') {
+        latestText = `codex streaming (${ev.count} lines)`;
       }
     },
     finalize() {
@@ -247,7 +255,7 @@ async function executeRun(ctx, opts) {
   });
 
   try {
-    const fn = agent === 'cursor' ? runCursor : runClaude;
+    const fn = agent === 'cursor' ? runCursor : agent === 'codex' ? runCodex : runClaude;
     const { text, sessionId: newId } = await fn({
       prompt,
       cwd,
@@ -446,7 +454,7 @@ async function handleCommand(ctx, command, arg) {
         const p = projects.get(s.projectId);
         cleared.push(`project **${p?.name || s.projectId}**`);
       }
-      if (sessions.resetFreeform(ctx.chatId)) cleared.push('Q&A (/claude /cursor)');
+      if (sessions.resetFreeform(ctx.chatId)) cleared.push('Q&A (/claude /cursor /codex)');
       if (!cleared.length) return ctx.sendText('Nothing to reset.');
       return ctx.sendMarkdown('🔄 Cleared: ' + cleared.join(', '));
     }
@@ -466,6 +474,11 @@ async function handleCommand(ctx, command, arg) {
     case 'cursor': {
       if (!arg) return ctx.sendText('Usage: /cursor <prompt>');
       return handleFreeform(ctx, arg, 'cursor');
+    }
+
+    case 'codex': {
+      if (!arg) return ctx.sendText('Usage: /codex <prompt>');
+      return handleFreeform(ctx, arg, 'codex');
     }
 
     default:
@@ -531,7 +544,7 @@ async function handleCallbackAction(ctx, action) {
     return;
   }
 
-  const pickMatch = action.match(/^m:pick:(fcl|fcu|proj)$/);
+  const pickMatch = action.match(/^m:pick:(fcl|fcu|fco|proj)$/);
   if (pickMatch) {
     const scope = pickMatch[1];
     const presets = getScopePresets(ctx.chatId, scope);
@@ -551,7 +564,7 @@ async function handleCallbackAction(ctx, action) {
     return;
   }
 
-  const setMatch = action.match(/^m:set:(fcl|fcu|proj):(.+)$/);
+  const setMatch = action.match(/^m:set:(fcl|fcu|fco|proj):(.+)$/);
   if (setMatch) {
     const scope = setMatch[1];
     const raw = setMatch[2];
@@ -560,6 +573,7 @@ async function handleCallbackAction(ctx, action) {
 
     if (scope === 'fcl') sessions.setFreeformModel(ctx.chatId, 'claude', modelId);
     else if (scope === 'fcu') sessions.setFreeformModel(ctx.chatId, 'cursor', modelId);
+    else if (scope === 'fco') sessions.setFreeformModel(ctx.chatId, 'codex', modelId);
     else if (scope === 'proj') {
       const s = sessions.get(ctx.chatId);
       if (!s.projectId) { await ctx.acknowledgeAction('No active project'); return; }
@@ -586,6 +600,7 @@ const COMMANDS = [
   { command: 'model', description: 'Pick model for Q&A or active project' },
   { command: 'claude', description: 'Ask Claude (no project needed): /claude <prompt>' },
   { command: 'cursor', description: 'Ask Cursor (no project needed): /cursor <prompt>' },
+  { command: 'codex', description: 'Ask Codex (no project needed): /codex <prompt>' },
   { command: 'cancel', description: 'Abort the running agent' },
   { command: 'dashboard', description: 'Open the web dashboard' },
   { command: 'help', description: 'Show help' },

@@ -134,9 +134,9 @@ async function handleInboundEmail(parsed, config) {
     }
   }
 
-  // Trigger pattern: "hi /claude <prompt>" or "hi /cursor <prompt>"
+  // Trigger pattern: "hi /claude <prompt>", "hi /cursor <prompt>", or "hi /codex <prompt>"
   // Prompt is optional when attachments are present
-  const match = body.match(/hi\s+\/(claude|cursor)(?:\s+([\s\S]+))?/i);
+  const match = body.match(/hi\s+\/(claude|cursor|codex)(?:\s+([\s\S]+))?/i);
   if (!match) {
     log.info('no trigger found — needs: hi /claude <prompt>', { from });
     return;

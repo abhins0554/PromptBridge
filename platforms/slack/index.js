@@ -65,8 +65,10 @@ async function maybeHandleAttachments(app, event) {
   let userPrompt = text;
   const claudeMatch = text.match(/^\/?claude(?:\s+([\s\S]*))?$/i);
   const cursorMatch = text.match(/^\/?cursor(?:\s+([\s\S]*))?$/i);
+  const codexMatch = text.match(/^\/?codex(?:\s+([\s\S]*))?$/i);
   if (claudeMatch) { agentOverride = 'claude'; userPrompt = (claudeMatch[1] || '').trim(); }
   else if (cursorMatch) { agentOverride = 'cursor'; userPrompt = (cursorMatch[1] || '').trim(); }
+  else if (codexMatch) { agentOverride = 'codex'; userPrompt = (codexMatch[1] || '').trim(); }
   if (!userPrompt) userPrompt = 'Analyze the attached file(s) and summarize the contents.';
 
   const threadTs = event.thread_ts || event.ts || null;
@@ -80,7 +82,7 @@ async function maybeHandleAttachments(app, event) {
   const cwdResult = getAttachmentCwd(ctx.chatId, agentOverride);
   if (cwdResult.error === 'no-project') {
     await ctx.sendText(
-      'Attach a file with `/claude ...` or `/cursor ...`, or activate a project first.',
+      'Attach a file with `/claude ...`, `/cursor ...`, or `/codex ...`, or activate a project first.',
     );
     return true;
   }
@@ -148,7 +150,7 @@ function createBot() {
     await handleCommand(ctx, 'use', command.text.trim());
   });
 
-  for (const cmd of ['claude', 'cursor']) {
+  for (const cmd of ['claude', 'cursor', 'codex']) {
     app.command(`/${cmd}`, async ({ command, ack, client, body }) => {
       await ack();
       const current = require('../../lib/config').get().slack || {};

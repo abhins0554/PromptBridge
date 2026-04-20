@@ -47,7 +47,7 @@ async function checkComments() {
 
     log.info('polling repos', { count: allowedRepos.length, repos: allowedRepos.slice(0, 3) });
 
-    // Check each allowed repo for /claude or /cursor mentions
+    // Check each allowed repo for /claude, /cursor, or /codex mentions
     for (const repoFullName of allowedRepos) {
       const [owner, repo] = repoFullName.split('/');
       if (!owner || !repo) {
@@ -56,7 +56,7 @@ async function checkComments() {
       }
 
       try {
-        const query = `repo:${owner}/${repo} (/claude OR /cursor) in:comments updated:>=${lastDay}`;
+        const query = `repo:${owner}/${repo} (/claude OR /cursor OR /codex) in:comments updated:>=${lastDay}`;
         log.debug('searching repo', { owner, repo });
 
         const { data: searchResults } = await octokit.rest.search.issuesAndPullRequests({
@@ -107,7 +107,7 @@ async function checkComments() {
               const cmd = parseCommand(comment.body);
               log.debug('parse result', { body: comment.body.substring(0, 50), cmd });
 
-              if (!cmd || !['claude', 'cursor'].includes(cmd.command)) {
+              if (!cmd || !['claude', 'cursor', 'codex'].includes(cmd.command)) {
                 log.debug('not a command or wrong command', { cmd });
                 continue;
               }

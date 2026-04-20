@@ -219,7 +219,7 @@
     let modelCache = null;
     async function ensureModelCache() {
       if (modelCache) return modelCache;
-      try { modelCache = await api('/api/models'); } catch { modelCache = { claude: [], cursor: [] }; }
+      try { modelCache = await api('/api/models'); } catch { modelCache = { claude: [], cursor: [], codex: [] }; }
       return modelCache;
     }
     async function populateModelPresets() {
@@ -370,6 +370,7 @@
         // Agent
         $('#s-claudeCmd').value = s.claudeCmd || '';
         $('#s-cursorCmd').value = s.cursorCmd || '';
+        $('#s-codexCmd').value = s.codexCmd || '';
         $('#s-permissionMode').value = s.permissionMode || 'bypassPermissions';
         $('#s-agentTimeoutMs').value = s.agentTimeoutMs ? Math.round(s.agentTimeoutMs / 60000) : 60;
         $('#s-freeformCwd').value = s.freeformCwd || '';
@@ -434,6 +435,7 @@
         },
         claudeCmd: $('#s-claudeCmd').value.trim() || 'claude',
         cursorCmd: $('#s-cursorCmd').value.trim() || 'cursor-agent',
+        codexCmd: $('#s-codexCmd').value.trim() || 'codex',
         permissionMode: $('#s-permissionMode').value,
         agentTimeoutMs: timeoutMin > 0 ? Math.round(timeoutMin * 60000) : 3600000,
         freeformCwd: $('#s-freeformCwd').value.trim(),

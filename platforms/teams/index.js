@@ -131,19 +131,21 @@ async function maybeHandleAttachments(context, activity, botCtx, userPrompt) {
   let agentOverride = null;
   let prompt = userPrompt;
 
-  // Check for /claude or /cursor prefixes
+  // Check for /claude, /cursor, or /codex prefixes
   const claudeMatch = userPrompt.match(/^\/claude(?:\s+([\s\S]*))?$/i);
   const cursorMatch = userPrompt.match(/^\/cursor(?:\s+([\s\S]*))?$/i);
+  const codexMatch = userPrompt.match(/^\/codex(?:\s+([\s\S]*))?$/i);
   
   if (claudeMatch) { agentOverride = 'claude'; prompt = (claudeMatch[1] || '').trim(); }
   else if (cursorMatch) { agentOverride = 'cursor'; prompt = (cursorMatch[1] || '').trim(); }
+  else if (codexMatch) { agentOverride = 'codex'; prompt = (codexMatch[1] || '').trim(); }
   
   if (!prompt) prompt = 'Analyze the attached file(s) and summarize the contents.';
 
   const cwdResult = getAttachmentCwd(botCtx.chatId, agentOverride);
   if (cwdResult.error === 'no-project') {
     await botCtx.sendText(
-      'Please attach files with `/claude ...` or `/cursor ...`, or activate a project first.',
+      'Please attach files with `/claude ...`, `/cursor ...`, or `/codex ...`, or activate a project first.',
     );
     return true;
   }

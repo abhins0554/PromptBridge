@@ -138,8 +138,8 @@ function createBot() {
     });
 
     try {
-      if (cmd.command === 'claude' || cmd.command === 'cursor') {
-        // Treat as /claude or /cursor command with the argument
+      if (cmd.command === 'claude' || cmd.command === 'cursor' || cmd.command === 'codex') {
+        // Treat as /claude, /cursor, or /codex command with the argument
         await handleCommand(ctx, cmd.command, cmd.arg);
       } else {
         // Other commands (/projects, /help, etc.)
