@@ -5,8 +5,15 @@
   "main": "bot.js",
   "scripts": {
     "dev": "node --watch --watch-path=./bot.js --watch-path=./lib --watch-path=./core --watch-path=./platforms --watch-path=./public bot.js",
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "electron": "electron .",
+    "electron:dev": "cross-env NODE_ENV=development electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build": "electron-builder --win --mac --linux"
   },
+  "postinstall": "electron-builder install-app-deps",
   "engines": {
     "node": ">=18.17"
   },
@@ -22,5 +29,47 @@
     "mailparser": "^3.9.8",
     "nodemailer": "^8.0.5",
     "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.0.0",
+    "electron-store": "^8.1.0"
+  },
+  "build": {
+    "appId": "com.promptbridge.app",
+    "productName": "PromptBridge",
+    "directories": {
+      "output": "dist",
+      "buildResources": "electron/assets"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!electron/assets/source/**",
+      "!electron/assets/*.js"
+    ],
+    "extraResources": [
+      {
+        "from": "public",
+        "to": "public"
+      }
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "electron/assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "electron/assets/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "electron/assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

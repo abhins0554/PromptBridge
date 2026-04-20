@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PromptBridge Control</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+      color: #e0e0e0;
+      padding: 20px;
+      overflow-y: auto;
+      height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #444;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .port-config {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #999;
+    }
+
+    .port-config input {
+      width: 80px;
+      padding: 6px 10px;
+      border: 1px solid #444;
+      background: #2d2d44;
+      color: #e0e0e0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .port-config button {
+      padding: 6px 12px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+
+    .port-config button:hover {
+      background: #7c3aed;
+    }
+
+    .restart-notice {
+      background: #5f2a0b;
+      color: #fcd34d;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+    }
+
+    .restart-notice.show {
+      display: block;
+    }
+
+    .platforms {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .platform-card {
+      background: #3a3a52;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+
+    .platform-card:hover {
+      border-color: #6366f1;
+      background: #414159;
+    }
+
+    .platform-card.unconfigured {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .platform-info {
+      flex: 1;
+    }
+
+    .platform-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .platform-status {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-indicator.running {
+      background: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    .status-indicator.stopped {
+      background: #666;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .badge.configured {
+      background: #1e40af;
+      color: #93c5fd;
+    }
+
+    .badge.unconfigured {
+      background: #7c2d12;
+      color: #fed7aa;
+    }
+
+    .platform-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-start {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-start:hover:not(:disabled) {
+      background: #059669;
+    }
+
+    .btn-stop {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-stop:hover:not(:disabled) {
+      background: #dc2626;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn-full {
+      padding: 12px 16px;
+      width: 100%;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #7c3aed;
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #444;
+    }
+
+    .footer a {
+      color: #6366f1;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #6366f1;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>PromptBridge Control</h1>
+      <div class="port-config">
+        <label for="port-input">Dashboard Port:</label>
+        <input type="number" id="port-input" min="1024" max="65535" value="3000" />
+        <button id="port-save-btn">Save</button>
+      </div>
+      <div class="restart-notice" id="restart-notice">
+        Port changed. Restart required.
+      </div>
+    </div>
+
+    <div class="platforms" id="platforms"></div>
+
+    <div class="actions">
+      <button class="btn-full btn-primary" id="start-all-btn">Start All</button>
+      <button class="btn-full btn-secondary" id="stop-all-btn">Stop All</button>
+    </div>
+
+    <button class="btn-full btn-primary" id="open-dashboard-btn">Open Dashboard</button>
+
+    <div class="footer">
+      <p>PromptBridge v2.0.0</p>
+      <p><a href="#">GitHub</a> · <a href="#">Docs</a></p>
+    </div>
+  </div>
+
+  <script>
+    const PLATFORMS = ['telegram', 'discord', 'slack', 'teams', 'email', 'github'];
+    const PLATFORM_LABELS = {
+      telegram: 'Telegram',
+      discord: 'Discord',
+      slack: 'Slack',
+      teams: 'Microsoft Teams',
+      email: 'Email (IMAP/SMTP)',
+      github: 'GitHub Polling',
+    };
+
+    let portNeedsRestart = false;
+
+    async function updateStatus() {
+      try {
+        const status = await window.bot.getStatus();
+        const port = await window.bot.getPort();
+        document.getElementById('port-input').value = port;
+
+        const container = document.getElementById('platforms');
+        container.innerHTML = '';
+
+        for (const name of PLATFORMS) {
+          const platform = status.platforms?.[name] || { running: false, configured: false };
+          const card = document.createElement('div');
+          card.className = `platform-card ${!platform.configured ? 'unconfigured' : ''}`;
+
+          const indicator = platform.running ? 'running' : 'stopped';
+          const indicatorText = platform.running ? 'Running' : 'Stopped';
+          const badge = platform.configured ? 'configured' : 'unconfigured';
+          const badgeText = platform.configured ? 'Configured' : 'Not Configured';
+
+          card.innerHTML = `
+            <div class="platform-info">
+              <div class="platform-name">
+                ${PLATFORM_LABELS[name]}
+                <span class="badge ${badge}">${badgeText}</span>
+              </div>
+              <div class="platform-status">
+                <span class="status-indicator ${indicator}"></span>
+                <span>${indicatorText}</span>
+              </div>
+            </div>
+            <div class="platform-controls">
+              ${platform.running
+                ? `<button class="btn btn-stop" onclick="stopPlatform('${name}')">Stop</button>`
+                : `<button class="btn btn-start" ${!platform.configured ? 'disabled' : ''} onclick="startPlatform('${name}')">Start</button>`
+              }
+            </div>
+          `;
+
+          container.appendChild(card);
+        }
+      } catch (err) {
+        console.error('Failed to update status:', err);
+      }
+    }
+
+    async function startPlatform(name) {
+      try {
+        await window.bot.startPlatform(name);
+        await updateStatus();
+      } catch (err) {
+        console.error(`Failed to start ${name}:`, err);
+      }
+    }
+
+    async function stopPlatform(name) {
+      try {
+        await window.bot.stopPlatform(name);
+        await updateStatus();
+      } catch (err) {
+        console.error(`Failed to stop ${name}:`, err);
+      }
+    }
+
+    async function startAll() {
+      for (const name of PLATFORMS) {
+        await startPlatform(name);
+      }
+    }
+
+    async function stopAll() {
+      for (const name of PLATFORMS) {
+        await stopPlatform(name);
+      }
+    }
+
+    async function savePort() {
+      const port = parseInt(document.getElementById('port-input').value, 10);
+      if (port < 1024 || port > 65535) {
+        alert('Port must be between 1024 and 65535');
+        return;
+      }
+      try {
+        const result = await window.bot.setPort(port);
+        if (result.ok && result.needsRestart) {
+          portNeedsRestart = true;
+          document.getElementById('restart-notice').classList.add('show');
+        }
+      } catch (err) {
+        alert('Failed to save port: ' + err.message);
+      }
+    }
+
+    document.getElementById('start-all-btn').addEventListener('click', startAll);
+    document.getElementById('stop-all-btn').addEventListener('click', stopAll);
+    document.getElementById('open-dashboard-btn').addEventListener('click', () => {
+      window.bot.openDashboard();
+    });
+    document.getElementById('port-save-btn').addEventListener('click', savePort);
+
+    // Initial status and auto-update every 2 seconds
+    updateStatus();
+    setInterval(updateStatus, 2000);
+  </script>
+</body>
+</html>
