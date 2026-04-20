@@ -2,6 +2,7 @@
   "name": "promptbridge",
   "version": "2.0.0",
   "description": "PromptBridge — multi-platform AI agent orchestrator. Drive Claude Code / Cursor agents from Telegram, Email, and more, with a web dashboard for configuration.",
+  "author": "Abhishek",
   "main": "electron/main.js",
   "scripts": {
     "dev": "node --watch --watch-path=./bot.js --watch-path=./lib --watch-path=./core --watch-path=./platforms --watch-path=./public bot.js",
@@ -9,10 +10,10 @@
     "electron": "electron .",
     "electron:dev": "cross-env NODE_ENV=development electron .",
     "prebuild": "node -e \"const fs = require('fs'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.png'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.ico'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.icns'); console.log('Icons prepared from logo.png');\"",
-    "build:win": "npm run prebuild && electron-builder --win",
+    "build:win": "npm run prebuild && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win",
     "build:mac": "npm run prebuild && electron-builder --mac",
     "build:linux": "npm run prebuild && electron-builder --linux",
-    "build": "npm run prebuild && electron-builder --win --mac --linux"
+    "build": "npm run prebuild && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --mac --linux"
   },
   "postinstall": "electron-builder install-app-deps",
   "engines": {
@@ -58,7 +59,6 @@
     ],
     "win": {
       "target": [
-        "nsis",
         "portable"
       ],
       "icon": "electron/assets/icon.ico"
