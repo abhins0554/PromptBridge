@@ -9,7 +9,7 @@
     "start": "node bot.js",
     "electron": "electron .",
     "electron:dev": "cross-env NODE_ENV=development electron .",
-    "prebuild": "node -e \"const fs = require('fs'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.png'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.ico'); fs.copyFileSync('public/logo.png', 'electron/assets/icon.icns'); console.log('Icons prepared from logo.png');\"",
+    "prebuild": "node electron/assets/prepare-icons.js",
     "build:win": "npm run prebuild && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win",
     "build:mac": "npm run prebuild && electron-builder --mac",
     "build:linux": "npm run prebuild && electron-builder --linux",
@@ -36,7 +36,9 @@
     "cross-env": "^7.0.3",
     "electron": "^41.2.1",
     "electron-builder": "^24.0.0",
-    "electron-store": "^8.1.0"
+    "electron-store": "^8.1.0",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.5"
   },
   "build": {
     "appId": "com.promptbridge.app",
@@ -60,8 +62,7 @@
     "win": {
       "target": [
         "portable"
-      ],
-      "icon": "electron/assets/icon.ico"
+      ]
     },
     "mac": {
       "target": "dmg",
@@ -70,10 +71,6 @@
     "linux": {
       "target": "AppImage",
       "icon": "electron/assets/icon.png"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
     }
   }
 }
