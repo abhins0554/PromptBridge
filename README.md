@@ -6,7 +6,7 @@
 
 **Multi-platform AI agent orchestrator**
 
-Drive **Claude Code** and **Cursor** agents from **Telegram**, **Discord**, **Slack**, **Teams**, **GitHub**, **Email**, or any platform you wire in — with a zero-config web dashboard.
+Drive **Claude Code**, **Cursor**, and **Codex** agents from **Telegram**, **Discord**, **Slack**, **Teams**, **GitHub**, **Email**, or any platform you wire in — with a zero-config web dashboard.
 
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.17-brightgreen?logo=node.js)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -44,8 +44,8 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
                 │
         ┌───────┴────────┐
         │                │
-   Claude Code        Cursor
-    (claude CLI)   (cursor-agent CLI)
+ Claude Code      Cursor       Codex
+  (claude CLI) (cursor-agent CLI) (codex CLI)
 </code></pre>
 </div>
 
@@ -57,8 +57,8 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
 - **Discord bot** — use slash commands, buttons, plain channel messages, and attachments
 - **Slack app** — use slash commands, channel/thread replies, buttons, and file attachments
 - **Microsoft Teams bot** — use adaptive cards, team/group/personal chat, and file attachments
-- **GitHub integration** — mention `/claude` in issue/PR comments, bot responds as comments
-- **Email triggers** — send `hi /claude <prompt>` to your inbox, get a reply with results
+- **GitHub integration** — mention `/claude`, `/cursor`, or `/codex` in issue/PR comments, bot responds as comments
+- **Email triggers** — send `hi /claude <prompt>`, `hi /cursor <prompt>`, or `hi /codex <prompt>` to your inbox, get a reply with results
 - **Email attachments** — attach files to your email; the agent reads them just like Telegram
 - **Inbound IMAP** — real-time email monitoring with IDLE push and exponential-backoff reconnect
 - **Web dashboard** — configure everything at `http://localhost:3000` — no restarts needed
@@ -77,6 +77,7 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
 - **Node.js ≥ 18.17**
 - **[Claude Code CLI](https://claude.ai/code)** (`claude`) on PATH — for Claude agent support
 - **Cursor agent** (`cursor-agent`) on PATH — optional, for Cursor support
+- **Codex CLI** (`codex`) on PATH — optional, for Codex support
 
 ### Install
 
@@ -147,9 +148,9 @@ npm run dev        # development — auto-restarts on file changes
    - For efficiency with GitHub's search rate limit (30 req/min), specify your repos
 5. Add allowed GitHub usernames or user IDs (leave blank to allow all users)
 6. Click **Save Settings** — polling starts automatically (checks every 120 seconds)
-7. Users can now mention `/claude` or `/cursor` in issue/PR comments, and the bot will respond within 2 minutes
+7. Users can now mention `/claude`, `/cursor`, or `/codex` in issue/PR comments, and the bot will respond within 2 minutes
 
-**Note:** GitHub integration uses polling (no webhook setup needed). Every 2 minutes, the bot searches your allowed repos for `/claude` or `/cursor` mentions in issue/PR comments and responds directly.
+**Note:** GitHub integration uses polling (no webhook setup needed). Every 2 minutes, the bot searches your allowed repos for `/claude`, `/cursor`, or `/codex` mentions in issue/PR comments and responds directly.
 
 ---
 
@@ -174,6 +175,7 @@ The dashboard is the primary configuration interface. All runtime settings are s
 |---------|-------------|
 | `/claude <prompt>` | Ask Claude Code anything |
 | `/cursor <prompt>` | Ask Cursor agent anything |
+| `/codex <prompt>` | Ask Codex anything |
 | `/projects` | List and switch active project |
 | `/use <name>` | Activate a project |
 | `/current` | Show active project and session ID |
@@ -183,7 +185,7 @@ The dashboard is the primary configuration interface. All runtime settings are s
 | `/dashboard` | Dashboard URL |
 | `/help` | Show help |
 
-Plain text (no slash) runs the active project's agent. Send a file with a `/claude` or `/cursor` caption to have the agent read it.
+Plain text (no slash) runs the active project's agent. Send a file with a `/claude`, `/cursor`, or `/codex` caption to have the agent read it.
 
 ### Discord
 
@@ -193,6 +195,7 @@ Use slash commands with the same command surface as Telegram:
 |---------|-------------|
 | `/claude <prompt>` | Ask Claude Code anything |
 | `/cursor <prompt>` | Ask Cursor agent anything |
+| `/codex <prompt>` | Ask Codex anything |
 | `/projects` | List and switch active project |
 | `/use <project>` | Activate a project for the current channel |
 | `/current` | Show active project and session ID |
@@ -202,7 +205,7 @@ Use slash commands with the same command surface as Telegram:
 | `/dashboard` | Dashboard URL |
 | `/help` | Show help |
 
-Plain channel messages run the active project's agent. Send attachments with a `/claude` or `/cursor` message to have the agent read them from disk.
+Plain channel messages run the active project's agent. Send attachments with a `/claude`, `/cursor`, or `/codex` message to have the agent read them from disk.
 
 ### Slack
 
@@ -212,6 +215,7 @@ Slack uses **message-based interactions** via Socket Mode. Send commands as regu
 |---------|-------------|
 | `/claude <prompt>` | Ask Claude Code anything |
 | `/cursor <prompt>` | Ask Cursor agent anything |
+| `/codex <prompt>` | Ask Codex anything |
 | `/projects` | List and switch active project |
 | `/use <project>` | Activate a project for the current channel |
 | `/current` | Show active project and session ID |
@@ -231,6 +235,7 @@ Teams uses **adaptive cards** for rich interactions. Send commands as regular me
 |---------|-------------|
 | `/claude <prompt>` | Ask Claude Code anything |
 | `/cursor <prompt>` | Ask Cursor agent anything |
+| `/codex <prompt>` | Ask Codex anything |
 | `/projects` | List and switch active project (displays as adaptive card) |
 | `/use <project>` | Activate a project for the current chat |
 | `/current` | Show active project and session ID |
@@ -244,12 +249,13 @@ Teams supports **adaptive card buttons** for interactive menus. Send files with 
 
 ### GitHub
 
-Mention `/claude` or `/cursor` in **issue comments** or **pull request comments** to trigger the agent. The bot responds directly to the same issue/PR via polling (every 120 seconds):
+Mention `/claude`, `/cursor`, or `/codex` in **issue comments** or **pull request comments** to trigger the agent. The bot responds directly to the same issue/PR via polling (every 120 seconds):
 
 | Command | Description |
 |---------|-------------|
 | `/claude <prompt>` | Ask Claude Code in an issue/PR comment |
 | `/cursor <prompt>` | Ask Cursor agent in an issue/PR comment |
+| `/codex <prompt>` | Ask Codex in an issue/PR comment |
 | `/help` | Show available commands |
 
 **Example:** In a pull request comment, type:
@@ -258,14 +264,14 @@ Mention `/claude` or `/cursor` in **issue comments** or **pull request comments*
 ```
 
 The bot will:
-1. Poll the repo every 2 minutes for your `/claude` or `/cursor` mentions
+1. Poll the repo every 2 minutes for your `/claude`, `/cursor`, or `/codex` mentions
 2. Fetch the issue/PR description and all comments
-3. Run Claude/Cursor with the full context
+3. Run the selected agent with the full context
 4. Post the response as a reply comment on the same issue/PR
 
 **Polling:** The bot checks allowed repos every 120 seconds. Specify repos in Settings → GitHub Integration → Allowed Repositories to optimize API rate limits.
 
-**Session awareness:** The bot maintains conversation state per issue/PR, so follow-up `/claude` commands in the same thread include all previous context.
+**Session awareness:** The bot maintains conversation state per issue/PR, so follow-up `/claude`, `/cursor`, or `/codex` commands in the same thread include all previous context.
 
 ### Email
 
@@ -274,7 +280,7 @@ Send a trigger email to your configured inbox:
 ```
 Subject: Any subject
 
-hi /claude explain the architecture of this codebase
+hi /codex explain the architecture of this codebase
 
 ---
 ```
@@ -284,7 +290,7 @@ Or attach files — the agent will read them from disk, same as Telegram:
 ```
 Subject: Code review
 
-hi /claude review the attached file and suggest improvements
+hi /codex review the attached file and suggest improvements
 
 [attachment: myfile.py]
 ```
@@ -359,6 +365,7 @@ The reply arrives as a standard email with any generated files as attachments.
 | GitHub allowlist | Usernames/user IDs for GitHub access (leave blank to allow all) |
 | Claude executable | Path to `claude` CLI (default: `claude`) |
 | Cursor executable | Path to `cursor-agent` CLI (default: `cursor-agent`) |
+| Codex executable | Path to `codex` CLI (default: `codex`) |
 | Permission mode | `bypassPermissions` / `acceptEdits` / `plan` / `default` |
 | Agent timeout | Max seconds per run (default: 3600) |
 | SMTP settings | Outbound email for results |
@@ -393,7 +400,7 @@ platforms/
     attachments.js            Teams attachment download helpers
   github/
     index.js                  GitHub webhook listener (optional) — parses comments, routes commands
-    polling.js                GitHub polling agent — polls allowed repos for /claude /cursor commands
+    polling.js                GitHub polling agent — polls allowed repos for /claude /cursor /codex commands
     context.js                GitHubContext — posts responses as issue/PR comments
     attachments.js            GitHub attachment utilities
   email/
@@ -401,11 +408,11 @@ platforms/
     inbound.js                IMAP listener — real-time email monitoring
 lib/
   config.js                   Config loader (.env bootstrap + settings.json runtime)
-  runner.js                   Spawns claude / cursor-agent CLI processes
+  runner.js                   Spawns claude / cursor-agent / codex CLI processes
   store.js                    JSON persistence for projects + sessions
   changes.js                  Git diff + artifact detection
   format.js                   Markdown → HTML + chunking helpers
-  models.js                   Model presets (Claude / Cursor)
+  models.js                   Model presets (Claude / Cursor / Codex)
   server.js                   Express dashboard + REST API
   logger.js                   Leveled structured logger
 public/index.html             Single-file dashboard SPA
@@ -423,7 +430,7 @@ data/                         Runtime state — auto-created, gitignored
 | `POST` | `/api/projects` | Required | Create project |
 | `PUT` | `/api/projects/:id` | Required | Update project |
 | `DELETE` | `/api/projects/:id` | Required | Delete project |
-| `GET` | `/api/models` | Required | Claude + Cursor model presets |
+| `GET` | `/api/models` | Required | Claude + Cursor + Codex model presets |
 | `GET` | `/api/sessions` | Required | All chat sessions |
 | `DELETE` | `/api/sessions/:chatId/:projectId` | Required | Clear a session |
 | `GET` | `/api/settings` | Required | Runtime settings (secrets masked) |

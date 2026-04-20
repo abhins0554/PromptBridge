@@ -1,4 +1,4 @@
-# PromptBridge — Claude Code Reference
+# PromptBridge — Agent Reference
 
 ## Project identity
 - **Name**: PromptBridge (package name: `promptbridge`)
@@ -32,7 +32,7 @@ platforms/
     attachments.js            Teams attachment download helpers
   github/
     index.js                  GitHub webhook listener (optional) — parses comments, routes commands
-    polling.js                GitHub polling agent — polls allowed repos for /claude /cursor commands
+    polling.js                GitHub polling agent — polls allowed repos for /claude /cursor /codex commands
     context.js                GitHubContext — posts responses as issue/PR comments
     attachments.js            GitHub attachment utilities (stub)
   email/
@@ -40,11 +40,11 @@ platforms/
     inbound.js                IMAP listener — IDLE loop, retry backoff, attachment saving
 lib/
   config.js                   Config loader: .env (bootstrap) + data/settings.json (runtime)
-  runner.js                   Spawns claude / cursor-agent CLI processes
+  runner.js                   Spawns claude / cursor-agent / codex CLI processes
   store.js                    JSON persistence for projects + sessions
   changes.js                  Git diff / mtime artifact detection
   format.js                   Markdown→HTML, chunking, escape helpers
-  models.js                   Model presets (Claude / Cursor)
+  models.js                   Model presets (Claude / Cursor / Codex)
   server.js                   Express dashboard + REST API
   logger.js                   Leveled logger
 public/index.html             Single-file dashboard SPA
@@ -83,9 +83,9 @@ Every platform wraps its native event and implements `BotContext`:
 - Teams token/allowlist: `settings.json` takes precedence; `.env` TEAMS_APP_ID / TEAMS_APP_PASSWORD / TEAMS_ALLOWED_USERS / TEAMS_ALLOWED_USER_IDS still work as legacy fallback
 - GitHub token/allowlist/repos: `settings.json` takes precedence; `.env` GITHUB_TOKEN / GITHUB_WEBHOOK_SECRET / GITHUB_ALLOWED_REPOS / GITHUB_ALLOWED_USERS / GITHUB_ALLOWED_USER_IDS still work as legacy fallback
 - Settings edited via dashboard → `PUT /api/settings` → `saveSettings()` + `reloadConfig()` + auto-restart Telegram/Discord/Slack/Teams clients if bot settings changed
-- GitHub polling: every 120s checks allowed repos for `/claude` or `/cursor` commands in issue/PR comments; no webhook setup needed, uses only PAT token
+- GitHub polling: every 120s checks allowed repos for `/claude`, `/cursor`, or `/codex` commands in issue/PR comments; no webhook setup needed, uses only PAT token
 - `config.get()` has a 3-second TTL so changes propagate automatically
-- `runner.js` calls `require('./config').get()` fresh inside each `runClaude`/`runCursor` call
+- `runner.js` calls `require('./config').get()` fresh inside each `runClaude`/`runCursor`/`runCodex` call
 
 ### Email platform (`platforms/email/`)
 - `EmailContext` buffers all `sendMarkdown`/`sendText`/`sendFile` calls in memory
@@ -94,8 +94,8 @@ Every platform wraps its native event and implements `BotContext`:
 - Buttons are silently dropped (email has no interactive elements)
 - Dashboard trigger: `POST /api/run/email` in `lib/server.js`
 - Inbound IMAP: `inbound.js` — IDLE loop, `exists` event, exponential backoff reconnect
-  - Trigger format in email body: `hi /claude <prompt>` or `hi /cursor <prompt>`
-  - Email attachments saved to `freeformCwd/.bot-inbox/` then passed to Claude via enriched prompt (identical structure to `handleFiles` in dispatcher)
+  - Trigger format in email body: `hi /claude <prompt>`, `hi /cursor <prompt>`, or `hi /codex <prompt>`
+  - Email attachments saved to `freeformCwd/.bot-inbox/` then passed to the selected agent via enriched prompt (identical structure to `handleFiles` in dispatcher)
   - Inline images (`att.related === true`) skipped; 25 MB per-attachment size limit
 
 ### Adding a new platform
@@ -113,7 +113,7 @@ Every platform wraps its native event and implements `BotContext`:
 | POST | `/api/projects` | Create project |
 | PUT | `/api/projects/:id` | Update project |
 | DELETE | `/api/projects/:id` | Delete project |
-| GET | `/api/models` | Claude + Cursor model presets |
+| GET | `/api/models` | Claude + Cursor + Codex model presets |
 | GET | `/api/sessions` | All chat sessions |
 | DELETE | `/api/sessions/:chatId/:projectId` | Clear a session |
 | GET | `/api/settings` | Runtime settings (SMTP pass masked) |
