@@ -38,6 +38,8 @@ From the control window:
 
 ## Building
 
+**Note**: Before building, icons are automatically generated from `public/logo.png` via the `prebuild` script.
+
 ### Windows
 
 ```bash
