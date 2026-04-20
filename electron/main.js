@@ -5,15 +5,17 @@ console.log('Electron package loaded:', Object.keys(electronPackage).slice(0, 10
 const { app, BrowserWindow, Menu, ipcMain, shell } = electronPackage;
 console.log('Destructured - app:', typeof app);
 
-const Store = require('electron-store');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
-console.log('Electron app starting...');
+// Minimal store fallback (electron-store not included in bundle)
+const store = {
+  data: { port: process.env.PORT || 3000 },
+  get: (key) => store.data[key] || (key === 'port' ? 3000 : undefined),
+  set: (key, value) => { store.data[key] = value; },
+};
 
-const store = new Store({
-  defaults: { port: 3000 },
-});
+console.log('Electron app starting...');
 
 let mainWindow = null;
 let trayIcon = null;
