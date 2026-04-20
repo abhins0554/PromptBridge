@@ -1,6 +1,10 @@
-# Building PromptBridge on Windows
+# Building PromptBridge
 
-## Electron Desktop App Build
+## Windows Build
+
+### Prerequisites
+
+Move `electron-store` to runtime dependencies (already done in package.json).
 
 ### Option 1: Run as Administrator (Recommended)
 
@@ -42,11 +46,40 @@ Alternatively, enable Windows Developer Mode to allow symlink creation without a
 - Ensure you're on Windows 7 or newer
 - Check that the app has permission to write to the installation directory
 
-### Alternative: GitHub Actions
+## macOS & Linux Builds
 
-For automated cross-platform builds without local setup issues, use GitHub Actions:
+### Build for macOS
+Requires macOS:
 ```bash
-git push origin main  # Creates Windows/macOS/Linux builds automatically
+npm run build:mac
 ```
+Output: `dist/PromptBridge-2.0.0.dmg`
+
+### Build for Linux
+Requires Linux or WSL2:
+```bash
+npm run build:linux
+```
+Output: `dist/PromptBridge-2.0.0.AppImage`
+
+**Note**: Cannot cross-compile Linux binaries from Windows. Use WSL2 or a Linux machine.
+
+### Using WSL2 for Linux builds:
+```bash
+# In PowerShell on Windows:
+wsl --install Ubuntu
+
+# In Ubuntu WSL terminal:
+cd /mnt/c/Users/Abhishek/Desktop/telegram-bot
+npm install
+npm run build:linux
+```
+
+## Automated Builds with GitHub Actions
+
+For cross-platform builds without local setup, use GitHub Actions:
+1. Push code to GitHub: `git push origin main`
+2. CI automatically builds for Windows, macOS, and Linux
+3. Download releases from GitHub Releases page
 
 See `.github/workflows/build.yml` (if configured).
