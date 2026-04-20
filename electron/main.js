@@ -1,7 +1,15 @@
-const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
+console.log('Starting main process...');
+const electronPackage = require('electron');
+console.log('Electron package loaded:', Object.keys(electronPackage).slice(0, 10));
+
+const { app, BrowserWindow, Menu, ipcMain, shell } = electronPackage;
+console.log('Destructured - app:', typeof app);
+
 const Store = require('electron-store');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
+
+console.log('Electron app starting...');
 
 const store = new Store({
   defaults: { port: 3000 },
@@ -22,13 +30,7 @@ function createWindow() {
     },
   });
 
-  const controlHtmlPath = path.join(__dirname, 'control.html');
-  console.log('Loading control.html from:', controlHtmlPath);
-
-  mainWindow.loadFile(controlHtmlPath).catch(err => {
-    console.error('Failed to load control.html:', err);
-    mainWindow.loadURL('data:text/html,<h1>Error loading UI</h1><p>' + err.message + '</p>');
-  });
+  mainWindow.loadFile(path.join(__dirname, 'control.html'));
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
@@ -37,68 +39,69 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-
-  return mainWindow;
 }
 
 function createTray() {
   const { Tray } = require('electron');
-  const iconPath = path.join(__dirname, 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png');
+  const iconPath = path.join(__dirname, 'assets', 'icon.ico');
 
-  trayIcon = new Tray(iconPath);
+  try {
+    trayIcon = new Tray(iconPath);
+    console.log('Tray icon created');
 
-  function updateTrayMenu() {
-    const status = getPlatformStatus();
-    const runningCount = Object.values(status.platforms || {}).filter((p) => p.running).length;
-    const isRunning = runningCount > 0;
+    function updateTrayMenu() {
+      const status = getPlatformStatus();
+      const runningCount = Object.values(status.platforms || {}).filter((p) => p.running).length;
+      const isRunning = runningCount > 0;
 
-    const contextMenu = Menu.buildFromTemplate([
-      {
-        label: `PromptBridge — ${isRunning ? `Running (${runningCount})` : 'Stopped'} on :${store.get('port')}`,
-        enabled: false,
-      },
-      { type: 'separator' },
-      {
-        label: 'Open Dashboard',
-        click: () => {
-          shell.openExternal(`http://localhost:${store.get('port')}`);
+      const contextMenu = Menu.buildFromTemplate([
+        {
+          label: `PromptBridge — ${isRunning ? `Running (${runningCount})` : 'Stopped'} on :${store.get('port')}`,
+          enabled: false,
         },
-      },
-      { type: 'separator' },
-      {
-        label: isRunning ? 'Stop All Services' : 'Start All Services',
-        click: () => {
-          if (isRunning) {
-            stopAllPlatforms();
-          } else {
-            startAllPlatforms();
-          }
+        { type: 'separator' },
+        {
+          label: 'Open Dashboard',
+          click: () => {
+            shell.openExternal(`http://localhost:${store.get('port')}`);
+          },
         },
-      },
-      { type: 'separator' },
-      {
-        label: 'Quit',
-        click: () => {
-          app.quit();
+        { type: 'separator' },
+        {
+          label: isRunning ? 'Stop All Services' : 'Start All Services',
+          click: () => {
+            if (isRunning) {
+              stopAllPlatforms();
+            } else {
+              startAllPlatforms();
+            }
+          },
         },
-      },
-    ]);
+        { type: 'separator' },
+        {
+          label: 'Quit',
+          click: () => {
+            app.quit();
+          },
+        },
+      ]);
 
-    trayIcon.setContextMenu(contextMenu);
-  }
-
-  updateTrayMenu();
-
-  // Update tray menu every 2 seconds
-  setInterval(updateTrayMenu, 2000);
-
-  trayIcon.on('click', () => {
-    if (mainWindow) {
-      mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
-    } else {
-      createWindow();
+      trayIcon.setContextMenu(contextMenu);
     }
-  });
+
+    updateTrayMenu();
+    setInterval(updateTrayMenu, 2000);
+
+    trayIcon.on('click', () => {
+      if (mainWindow) {
+        mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
+      } else {
+        createWindow();
+      }
+    });
+  } catch (err) {
+    console.error('Failed to create tray:', err);
+  }
 }
 
 function getPlatformStatus() {
@@ -124,111 +127,109 @@ function stopAllPlatforms() {
   }
 }
 
-// IPC Handlers
-ipcMain.handle('get-status', () => {
-  return getPlatformStatus();
-});
+// Register IPC Handlers
+function setupIpcHandlers() {
+  ipcMain.handle('get-status', () => {
+    return getPlatformStatus();
+  });
 
-ipcMain.handle('start-platform', (_event, name) => {
-  if (botInstance && typeof botInstance.startPlatform === 'function') {
-    botInstance.startPlatform(name);
+  ipcMain.handle('start-platform', (_event, name) => {
+    if (botInstance && typeof botInstance.startPlatform === 'function') {
+      botInstance.startPlatform(name);
+      return { ok: true };
+    }
+    return { error: 'Bot not ready' };
+  });
+
+  ipcMain.handle('stop-platform', (_event, name) => {
+    if (botInstance && typeof botInstance.stopPlatform === 'function') {
+      botInstance.stopPlatform(name);
+      return { ok: true };
+    }
+    return { error: 'Bot not ready' };
+  });
+
+  ipcMain.handle('open-dashboard', () => {
+    shell.openExternal(`http://localhost:${store.get('port')}`);
     return { ok: true };
-  }
-  return { error: 'Bot not ready' };
-});
+  });
 
-ipcMain.handle('stop-platform', (_event, name) => {
-  if (botInstance && typeof botInstance.stopPlatform === 'function') {
-    botInstance.stopPlatform(name);
-    return { ok: true };
-  }
-  return { error: 'Bot not ready' };
-});
+  ipcMain.handle('get-port', () => {
+    return store.get('port');
+  });
 
-ipcMain.handle('open-dashboard', () => {
-  shell.openExternal(`http://localhost:${store.get('port')}`);
-  return { ok: true };
-});
-
-ipcMain.handle('get-port', () => {
-  return store.get('port');
-});
-
-ipcMain.handle('set-port', (_event, port) => {
-  const portNum = parseInt(port, 10);
-  if (portNum < 1024 || portNum > 65535) {
-    return { error: 'Port must be between 1024 and 65535' };
-  }
-  store.set('port', portNum);
-  return { ok: true, port: portNum, needsRestart: true };
-});
+  ipcMain.handle('set-port', (_event, port) => {
+    const portNum = parseInt(port, 10);
+    if (portNum < 1024 || portNum > 65535) {
+      return { error: 'Port must be between 1024 and 65535' };
+    }
+    store.set('port', portNum);
+    return { ok: true, port: portNum, needsRestart: true };
+  });
+}
 
 // App lifecycle
-app.on('ready', async () => {
-  console.log('Electron app ready event fired');
+app.on('ready', () => {
+  console.log('App ready event fired');
 
   try {
     // Set DATA_DIR to app's user data path
     process.env.DATA_DIR = path.join(app.getPath('userData'), 'data');
     process.env.PORT = store.get('port');
-    console.log('Env vars set:', { DATA_DIR: process.env.DATA_DIR, PORT: process.env.PORT });
+    console.log('Environment set. Creating window and tray...');
 
-    // Set up Electron UI first
-    console.log('Creating window...');
     createWindow();
-
-    console.log('Creating tray...');
     createTray();
+    setupIpcHandlers();
 
-    // Require and start the bot (after paths are set)
-    // Use setImmediate to avoid potential race conditions
-    setImmediate(async () => {
+    // Start the bot
+    setImmediate(() => {
       try {
-        console.log('Starting bot module...');
-        // Clear require cache to ensure fresh load
+        console.log('Loading bot module...');
         delete require.cache[require.resolve('../bot')];
         const botModule = require('../bot');
         botInstance = botModule;
-        console.log('Bot module loaded, calling start()...');
-        await botModule.start();
-        console.log('Bot started successfully');
+        console.log('Starting bot...');
+        botModule.start().then(() => {
+          console.log('Bot started successfully');
+        }).catch((err) => {
+          console.error('Bot startup error:', err.message);
+        });
       } catch (err) {
-        console.error('Bot startup failed:', err);
-        console.error('Stack:', err.stack);
-        if (mainWindow) {
-          mainWindow.webContents.send('bot-error', err.message);
-        }
+        console.error('Failed to load/start bot:', err.message);
       }
     });
 
-    // Suppress quit on window close — only tray exit
     app.on('window-all-closed', () => {
-      // Don't quit the app when windows are closed
+      // Don't quit - keep tray alive
     });
   } catch (err) {
-    console.error('Fatal error in app ready:', err);
-    console.error('Stack:', err.stack);
+    console.error('Ready event error:', err);
     process.exit(1);
   }
 });
 
 app.on('before-quit', () => {
+  console.log('App quitting, shutting down bot...');
   if (botInstance && typeof botInstance.shutdown === 'function') {
-    botInstance.shutdown('app-quit');
+    try {
+      botInstance.shutdown('app-quit');
+    } catch (e) {
+      console.error('Bot shutdown error:', e);
+    }
   }
 });
 
-// Prevent multiple instances
+// Single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
+  console.log('Another instance is running, quitting...');
   app.quit();
 } else {
   app.on('second-instance', () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
-    } else {
-      createWindow();
     }
   });
 }

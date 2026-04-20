@@ -391,7 +391,12 @@ function shutdown(reason) {
   setTimeout(() => process.exit(0), 800).unref();
 }
 
-if (require.main === module) {
+// Only start automatically if running as CLI (not from Electron)
+// Electron loads bot.js via require() from electron/main.js, so we check the parent module
+const isElectron = process.type === 'browser' || process.versions?.electron;
+const isCliEntry = require.main === module && !isElectron;
+
+if (isCliEntry) {
   logger.info('starting PromptBridge from CLI');
   start();
   process.once('SIGINT', () => shutdown('SIGINT'));

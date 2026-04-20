@@ -2,7 +2,7 @@
   "name": "promptbridge",
   "version": "2.0.0",
   "description": "PromptBridge — multi-platform AI agent orchestrator. Drive Claude Code / Cursor agents from Telegram, Email, and more, with a web dashboard for configuration.",
-  "main": "bot.js",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "node --watch --watch-path=./bot.js --watch-path=./lib --watch-path=./core --watch-path=./platforms --watch-path=./public bot.js",
     "start": "node bot.js",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "electron": "^31.0.0",
+    "electron": "^41.2.1",
     "electron-builder": "^24.0.0",
     "electron-store": "^8.1.0"
   },
@@ -56,7 +56,10 @@
       }
     ],
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "electron/assets/icon.ico"
     },
     "mac": {
