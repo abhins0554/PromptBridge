@@ -4,3 +4,5 @@ data/
 .claude/
 scratch/
 dist/
+electron/assets/*.ico
+electron/assets/*.icns
