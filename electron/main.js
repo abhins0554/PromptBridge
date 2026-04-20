@@ -22,7 +22,13 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'control.html'));
+  const controlHtmlPath = path.join(__dirname, 'control.html');
+  console.log('Loading control.html from:', controlHtmlPath);
+
+  mainWindow.loadFile(controlHtmlPath).catch(err => {
+    console.error('Failed to load control.html:', err);
+    mainWindow.loadURL('data:text/html,<h1>Error loading UI</h1><p>' + err.message + '</p>');
+  });
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
@@ -159,36 +165,51 @@ ipcMain.handle('set-port', (_event, port) => {
 
 // App lifecycle
 app.on('ready', async () => {
-  // Set DATA_DIR to app's user data path
-  process.env.DATA_DIR = path.join(app.getPath('userData'), 'data');
-  process.env.PORT = store.get('port');
+  console.log('Electron app ready event fired');
 
-  // Set up Electron UI first
-  createWindow();
-  createTray();
+  try {
+    // Set DATA_DIR to app's user data path
+    process.env.DATA_DIR = path.join(app.getPath('userData'), 'data');
+    process.env.PORT = store.get('port');
+    console.log('Env vars set:', { DATA_DIR: process.env.DATA_DIR, PORT: process.env.PORT });
 
-  // Require and start the bot (after paths are set)
-  // Use setImmediate to avoid potential race conditions
-  setImmediate(async () => {
-    try {
-      // Clear require cache to ensure fresh load
-      delete require.cache[require.resolve('../bot')];
-      const botModule = require('../bot');
-      botInstance = botModule;
-      await botModule.start();
-    } catch (err) {
-      console.error('Bot startup failed:', err);
-      console.error('Stack:', err.stack);
-      if (mainWindow) {
-        mainWindow.webContents.send('bot-error', err.message);
+    // Set up Electron UI first
+    console.log('Creating window...');
+    createWindow();
+
+    console.log('Creating tray...');
+    createTray();
+
+    // Require and start the bot (after paths are set)
+    // Use setImmediate to avoid potential race conditions
+    setImmediate(async () => {
+      try {
+        console.log('Starting bot module...');
+        // Clear require cache to ensure fresh load
+        delete require.cache[require.resolve('../bot')];
+        const botModule = require('../bot');
+        botInstance = botModule;
+        console.log('Bot module loaded, calling start()...');
+        await botModule.start();
+        console.log('Bot started successfully');
+      } catch (err) {
+        console.error('Bot startup failed:', err);
+        console.error('Stack:', err.stack);
+        if (mainWindow) {
+          mainWindow.webContents.send('bot-error', err.message);
+        }
       }
-    }
-  });
+    });
 
-  // Suppress quit on window close — only tray exit
-  app.on('window-all-closed', () => {
-    // Don't quit the app when windows are closed
-  });
+    // Suppress quit on window close — only tray exit
+    app.on('window-all-closed', () => {
+      // Don't quit the app when windows are closed
+    });
+  } catch (err) {
+    console.error('Fatal error in app ready:', err);
+    console.error('Stack:', err.stack);
+    process.exit(1);
+  }
 });
 
 app.on('before-quit', () => {
