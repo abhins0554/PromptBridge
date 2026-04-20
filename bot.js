@@ -15,10 +15,17 @@ function getGitHubPolling() {
   return githubPollingModule;
 }
 
-let config = require('./lib/config').get();
-if (config.errors.length) {
-  for (const e of config.errors) logger.error(e);
-  process.exit(1);
+// Lazy-load config (deferred until start() to allow Electron to set DATA_DIR first)
+let config = null;
+function getConfig() {
+  if (!config) {
+    config = require('./lib/config').get();
+    if (config.errors.length) {
+      for (const e of config.errors) logger.error(e);
+      process.exit(1);
+    }
+  }
+  return config;
 }
 
 const { createServer } = require('./lib/server');
@@ -335,13 +342,14 @@ function getPlatformStatus() {
 }
 
 async function start() {
+  const cfg = getConfig();
   logger.info('starting', {
     version: require('./package.json').version,
-    port: config.port,
-    timeoutMs: config.agentTimeoutMs,
-    logLevel: config.logLevel,
-    dashboardAuth: !!config.dashboardToken,
-    permissionMode: config.permissionMode,
+    port: cfg.port,
+    timeoutMs: cfg.agentTimeoutMs,
+    logLevel: cfg.logLevel,
+    dashboardAuth: !!cfg.dashboardToken,
+    permissionMode: cfg.permissionMode,
   });
 
   startTelegramBot();
@@ -353,13 +361,13 @@ async function start() {
     getStatus: () => getPlatformStatus(),
     restartPlatforms,
     bot: module.exports,
-  }).listen(config.port, () => {
-    logger.info('dashboard listening', { url: `http://localhost:${config.port}` });
+  }).listen(cfg.port, () => {
+    logger.info('dashboard listening', { url: `http://localhost:${cfg.port}` });
   });
 
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      logger.error(`Port ${config.port} in use — another instance is likely running.`);
+      logger.error(`Port ${cfg.port} in use — another instance is likely running.`);
       process.exit(1);
     }
     throw err;
