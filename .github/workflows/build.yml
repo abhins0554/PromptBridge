@@ -92,10 +92,19 @@ jobs:
         with:
           path: releases/
 
+      - name: List downloaded artifacts
+        run: |
+          echo "=== Artifacts Structure ==="
+          find releases/ -type f -name "*" | head -20
+          ls -lh releases/
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: releases/**/*
+          files: |
+            releases/PromptBridge-windows/**
+            releases/PromptBridge-macos/**
+            releases/PromptBridge-linux/**
           draft: false
           generate_release_notes: true
         env:
