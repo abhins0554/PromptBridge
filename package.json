@@ -10,11 +10,11 @@
     "electron": "electron .",
     "electron:dev": "cross-env NODE_ENV=development electron .",
     "prebuild": "node electron/assets/prepare-icons.js",
-    "build:win": "npm run prebuild && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --dir",
+    "build:win": "npm run prebuild && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win",
     "build:win:zip": "npm run build:win && cd dist && tar -a -c -f PromptBridge-2.0.0.zip win-unpacked && cd ..",
     "build:mac": "npm run prebuild && electron-builder --mac",
     "build:linux": "npm run prebuild && electron-builder --linux",
-    "build": "npm run prebuild && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --mac --linux"
+    "build": "npm run prebuild && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --mac --linux --publish never"
   },
   "postinstall": "electron-builder install-app-deps",
   "engines": {

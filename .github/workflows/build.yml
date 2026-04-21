@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PromptBridge-windows
-          path: dist/win-unpacked/
+          path: dist/*.exe
 
   build-macos:
     name: Build macOS
@@ -109,7 +109,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            releases/PromptBridge-windows/**
-            releases/PromptBridge-macos/**
-            releases/PromptBridge-linux/**
+            releases/PromptBridge-windows/*.exe
+            releases/PromptBridge-macos/*.dmg
+            releases/PromptBridge-linux/*.AppImage
           draft: false
