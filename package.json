@@ -63,7 +63,8 @@
     "win": {
       "target": [
         "portable"
-      ]
+      ],
+      "icon": "electron/assets/icon.png"
     },
     "mac": {
       "target": "dmg",
