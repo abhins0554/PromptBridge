@@ -6,8 +6,9 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
-env:
-  GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   build-windows:
@@ -106,5 +107,3 @@ jobs:
             releases/PromptBridge-macos/**
             releases/PromptBridge-linux/**
           draft: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
