@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
-const pngToIco = require('png-to-ico');
 
 const sourceIcon = path.join(__dirname, '..', '..', 'public', 'logo.png');
 const assetsDir = __dirname;
