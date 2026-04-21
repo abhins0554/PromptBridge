@@ -72,14 +72,32 @@ PromptBridge lets you control AI coding agents from anywhere — your phone, Dis
 
 ## Quick Start
 
-### Prerequisites
+### Option 1: Desktop App (Recommended for users)
+
+Download the standalone desktop application for your platform:
+
+- **Windows**: [PromptBridge.exe](https://github.com/abhins0554/PromptBridge/releases) — no Node.js required
+- **macOS**: [PromptBridge-X.X.X.dmg](https://github.com/abhins0554/PromptBridge/releases)
+- **Linux**: [PromptBridge-X.X.X.AppImage](https://github.com/abhins0554/PromptBridge/releases)
+
+Simply download, install, and run. The app includes:
+- **System tray icon** — quick access to start/stop services
+- **Control window** — per-platform start/stop toggles for Telegram, Discord, Slack, Teams, Email, GitHub
+- **Port configuration** — change the dashboard port without restarts
+- **All features bundled** — no additional setup needed
+
+### Option 2: Node.js Development
+
+For developers who want to run from source:
+
+#### Prerequisites
 
 - **Node.js ≥ 18.17**
 - **[Claude Code CLI](https://claude.ai/code)** (`claude`) on PATH — for Claude agent support
 - **Cursor agent** (`cursor-agent`) on PATH — optional, for Cursor support
 - **Codex CLI** (`codex`) on PATH — optional, for Codex support
 
-### Install
+#### Install
 
 ```bash
 git clone https://github.com/abhins0554/PromptBridge.git
@@ -87,7 +105,7 @@ cd PromptBridge
 npm install
 ```
 
-### Configure
+#### Configure
 
 ```bash
 cp .env.example .env
@@ -95,12 +113,69 @@ cp .env.example .env
 
 `.env` only needs bootstrap values (port, dashboard auth token). Everything else is set in the dashboard.
 
-### Run
+#### Run
 
+**CLI mode:**
 ```bash
 npm start          # production
 npm run dev        # development — auto-restarts on file changes
 ```
+
+**Electron desktop app (development):**
+```bash
+npm run electron        # run the Electron desktop app
+npm run electron:dev    # development mode with DevTools
+```
+
+---
+
+## Desktop App Features
+
+### System Tray Icon
+
+The Electron desktop app adds a system tray icon for quick access:
+
+- **Status indicator** — shows which services are running
+- **Quick menu** — Open Dashboard, Start All, Stop All, Quit
+- **Click to toggle** — click the tray icon to show/hide the control window
+- **Platform-aware** — running count updates in real-time
+
+### Control Window
+
+The control window provides per-platform management:
+
+| Feature | Description |
+|---------|-------------|
+| **Platform Cards** | Telegram, Discord, Slack, Teams, Email, GitHub |
+| **Status badges** | Shows if each platform is configured and running |
+| **Start/Stop buttons** | Toggle individual platforms without restarting |
+| **Start All / Stop All** | Quick bulk control |
+| **Port configuration** | Change dashboard port in the header |
+| **Open Dashboard** | Direct link to the web dashboard |
+
+### Building from Source
+
+To build the desktop app for your platform:
+
+```bash
+# Windows (requires admin or Developer Mode for symlinks)
+npm run build:win
+# Output: dist/PromptBridge-2.0.0.exe
+
+# macOS (requires macOS)
+npm run build:mac
+# Output: dist/PromptBridge-2.0.0.dmg
+
+# Linux (or WSL2)
+npm run build:linux
+# Output: dist/PromptBridge-2.0.0.AppImage
+```
+
+For cross-platform builds without a Mac/Linux machine, GitHub Actions automatically builds for all platforms when you push a tag.
+
+---
+
+## Configuration
 
 ### Set up Telegram
 

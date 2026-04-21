@@ -3,10 +3,39 @@
 ## Project identity
 - **Name**: PromptBridge (package name: `promptbridge`)
 - **Version**: 2.0.0
-- **Entry point**: `bot.js`
-- **Start**: `npm start` · **Dev (watch)**: `npm run dev`
+- **Main entry point** (Electron desktop app): `electron/main.js`
+- **CLI entry point** (Node.js): `bot.js`
+- **Start CLI**: `npm start` · **Dev (watch)**: `npm run dev`
+- **Start Electron**: `npm run electron` · **Dev (Electron)**: `npm run electron:dev`
+- **Build**: `npm run build:win` / `npm run build:mac` / `npm run build:linux`
 
 ## Architecture overview
+
+### Electron Desktop App (Cross-Platform)
+
+```
+electron/main.js              Electron entry point — manages app lifecycle
+  ├─ Creates system tray icon + context menu
+  ├─ Creates control window (BrowserWindow)
+  ├─ Sets DATA_DIR to app user data folder
+  ├─ Starts bot instance in main process
+  └─ IPC handlers: get-status, start-platform, stop-platform, open-dashboard, get-port, set-port
+
+electron/preload.js           Context bridge — exposes safe IPC to renderer
+  └─ window.bot: { getStatus, startPlatform, stopPlatform, openDashboard, getPort, setPort }
+
+electron/control.html         Control window UI (single-file SPA)
+  ├─ 6 platform cards with running/configured badges
+  ├─ Per-platform Start/Stop buttons
+  ├─ Port configuration in header
+  └─ Polls status every 2 seconds via IPC
+
+electron/assets/
+  ├─ icon.png / icon.ico / icon.icns — app icons for tray + installer
+  └─ prepare-icons.js — generates icons from logo.png before build
+```
+
+### CLI Entry Point (Node.js)
 
 ```
 bot.js                        Entry point — wires platforms + dashboard
@@ -98,6 +127,29 @@ Every platform wraps its native event and implements `BotContext`:
   - Email attachments saved to `freeformCwd/.bot-inbox/` then passed to the selected agent via enriched prompt (identical structure to `handleFiles` in dispatcher)
   - Inline images (`att.related === true`) skipped; 25 MB per-attachment size limit
 
+### Bot module exports (`bot.js`)
+
+**`bot.js` exports functions for Electron desktop app control:**
+
+- `start()` — initializes all platforms and starts the server
+- `shutdown(reason)` — gracefully stops all platforms (called on app quit or port change)
+- `startPlatform(name)` — starts a single platform by name (`'telegram'`, `'discord'`, etc.)
+- `stopPlatform(name)` — stops a single platform by name
+- `getPlatformStatus()` — returns current status: `{ platforms: { telegram: { running, configured }, ... }, port, version, inflightChats }`
+
+**Lazy config loading:**
+- `bot.js` defers config loading until after Electron sets `process.env.DATA_DIR`
+- Config is loaded via `getConfig()` internal function instead of at module-require time
+- This ensures settings persist to the correct OS user data folder (Windows: `%APPDATA%`, macOS: `~/Library/Application Support`, Linux: `~/.config`)
+
+**Guard for CLI vs Electron:**
+```javascript
+const isCliEntry = require.main === module && !isElectron;
+if (isCliEntry) start();
+```
+- CLI mode: `npm start` directly calls `bot.start()`
+- Electron mode: main process requires bot, calls methods via IPC
+
 ### Adding a new platform
 1. Create `platforms/<name>/context.js` implementing `BotContext`
 2. Create `platforms/<name>/index.js` to wire your platform's SDK
@@ -121,6 +173,9 @@ Every platform wraps its native event and implements `BotContext`:
 | POST | `/api/settings/email/test` | Test SMTP connection |
 | POST | `/api/settings/imap/test` | Test IMAP connection |
 | POST | `/api/run/email` | Trigger agent run + email result |
+| GET | `/api/platforms` | Get all platforms status + running states |
+| POST | `/api/platforms/:name/start` | Start a platform by name |
+| POST | `/api/platforms/:name/stop` | Stop a platform by name |
 
 ## Data files
 
