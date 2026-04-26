@@ -45,6 +45,7 @@
     "appId": "com.promptbridge.app",
     "productName": "PromptBridge",
     "publish": "never",
+    "asar": false,
     "directories": {
       "output": "dist",
       "buildResources": "electron/assets"
@@ -54,12 +55,6 @@
       "!dist/**",
       "!electron/assets/source/**",
       "!electron/assets/*.js"
-    ],
-    "extraResources": [
-      {
-        "from": "public",
-        "to": "public"
-      }
     ],
     "win": {
       "target": [
