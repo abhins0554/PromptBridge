@@ -63,6 +63,12 @@ function buildSlashCommands() {
       .addStringOption((opt) =>
         opt.setName('prompt').setDescription('Prompt').setRequired(true),
       ),
+    new SlashCommandBuilder()
+      .setName('opencode')
+      .setDescription('Ask OpenCode without an active project')
+      .addStringOption((opt) =>
+        opt.setName('prompt').setDescription('Prompt').setRequired(true),
+      ),
   ].map((cmd) => cmd.toJSON());
 }
 
@@ -95,9 +101,11 @@ async function maybeHandleAttachments(message) {
   const claudeMatch = content.match(/^\/claude(?:\s+([\s\S]*))?$/i);
   const cursorMatch = content.match(/^\/cursor(?:\s+([\s\S]*))?$/i);
   const codexMatch = content.match(/^\/codex(?:\s+([\s\S]*))?$/i);
+  const opencodeMatch = content.match(/^\/opencode(?:\s+([\s\S]*))?$/i);
   if (claudeMatch) { agentOverride = 'claude'; userPrompt = (claudeMatch[1] || '').trim(); }
   else if (cursorMatch) { agentOverride = 'cursor'; userPrompt = (cursorMatch[1] || '').trim(); }
   else if (codexMatch) { agentOverride = 'codex'; userPrompt = (codexMatch[1] || '').trim(); }
+  else if (opencodeMatch) { agentOverride = 'opencode'; userPrompt = (opencodeMatch[1] || '').trim(); }
   if (!userPrompt) userPrompt = 'Analyze the attached file(s) and summarize the contents.';
 
   const attachments = extractAttachments(message);
@@ -107,7 +115,7 @@ async function maybeHandleAttachments(message) {
   const cwdResult = getAttachmentCwd(ctx.chatId, agentOverride);
   if (cwdResult.error === 'no-project') {
     await ctx.sendText(
-      'Attach a file with `/claude ...`, `/cursor ...`, or `/codex ...`, or activate a project first.',
+      'Attach a file with `/claude ...`, `/cursor ...`, `/codex ...`, or `/opencode ...`, or activate a project first.',
     );
     return true;
   }

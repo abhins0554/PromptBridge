@@ -38,8 +38,9 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
+  mainWindow.on('close', (event) => {
+    event.preventDefault();
+    mainWindow.hide();
   });
 }
 
@@ -62,6 +63,17 @@ function createTray() {
           enabled: false,
         },
         { type: 'separator' },
+        {
+          label: 'Show Control Window',
+          click: () => {
+            if (mainWindow) {
+              mainWindow.show();
+              mainWindow.focus();
+            } else {
+              createWindow();
+            }
+          },
+        },
         {
           label: 'Open Dashboard',
           click: () => {
@@ -213,6 +225,11 @@ app.on('ready', () => {
 
 app.on('before-quit', () => {
   console.log('App quitting, shutting down bot...');
+  if (mainWindow) {
+    mainWindow.removeAllListeners('close');
+    mainWindow.close();
+    mainWindow = null;
+  }
   if (botInstance && typeof botInstance.shutdown === 'function') {
     try {
       botInstance.shutdown('app-quit');

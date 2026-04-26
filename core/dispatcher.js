@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { projects, sessions } = require('../lib/store');
-const { runClaude, runCursor, runCodex } = require('../lib/runner');
+const { runClaude, runCursor, runCodex, runOpenCode } = require('../lib/runner');
 const { snapshot, diffFromSnapshot, collectArtifacts } = require('../lib/changes');
 const { truncate, formatSize } = require('../lib/format');
 const { make } = require('../lib/logger');
@@ -38,6 +38,7 @@ function helpText() {
     '• `/claude <prompt>` — ask Claude Code anything',
     '• `/cursor <prompt>` — ask Cursor agent anything',
     '• `/codex <prompt>` — ask Codex anything',
+    '• `/opencode <prompt>` — ask OpenCode anything',
     '',
     '**Project work**',
     "• `/projects` — list & switch",
@@ -64,11 +65,13 @@ function buildModelMenu(chatId) {
   const fcl = sessions.getFreeformModel(chatId, 'claude');
   const fcu = sessions.getFreeformModel(chatId, 'cursor');
   const fco = sessions.getFreeformModel(chatId, 'codex');
+  const foc = sessions.getFreeformModel(chatId, 'opencode');
 
   const lines = ['**🎛 Model settings**', ''];
   lines.push(`• Q&A Claude: \`${fcl || 'default'}\``);
   lines.push(`• Q&A Cursor: \`${fcu || 'default'}\``);
   lines.push(`• Q&A Codex: \`${fco || 'default'}\``);
+  lines.push(`• Q&A OpenCode: \`${foc || 'default'}\``);
   if (p) {
     lines.push(`• Project **${p.name}** [${p.agent}]: \`${p.model || 'default'}\``);
   } else {
@@ -79,7 +82,10 @@ function buildModelMenu(chatId) {
     [
       { label: '🤖 Q&A Claude ▾', id: 'm:pick:fcl' },
       { label: '🤖 Q&A Cursor ▾', id: 'm:pick:fcu' },
+    ],
+    [
       { label: '🤖 Q&A Codex ▾', id: 'm:pick:fco' },
+      { label: '🤖 Q&A OpenCode ▾', id: 'm:pick:foc' },
     ],
   ];
   if (p) buttons.push([{ label: `📁 Project "${truncate(p.name, 16)}" ▾`, id: 'm:pick:proj' }]);
@@ -114,6 +120,7 @@ function getScopePresets(chatId, scope) {
   if (scope === 'fcl') return presetsFor('claude');
   if (scope === 'fcu') return presetsFor('cursor');
   if (scope === 'fco') return presetsFor('codex');
+  if (scope === 'foc') return presetsFor('opencode');
   if (scope === 'proj') {
     const s = sessions.get(chatId);
     const p = s.projectId ? projects.get(s.projectId) : null;
@@ -126,6 +133,7 @@ function scopeLabel(scope) {
   if (scope === 'fcl') return 'Q&A Claude';
   if (scope === 'fcu') return 'Q&A Cursor';
   if (scope === 'fco') return 'Q&A Codex';
+  if (scope === 'foc') return 'Q&A OpenCode';
   return 'active project';
 }
 
@@ -186,6 +194,8 @@ function createProgressTracker(ctx, messageId, agent, scope) {
         latestText = `cursor streaming (${ev.count} lines)`;
       } else if (ev.kind === 'codex_lines') {
         latestText = `codex streaming (${ev.count} lines)`;
+      } else if (ev.kind === 'opencode_lines') {
+        latestText = `opencode streaming (${ev.count} lines)`;
       }
     },
     finalize() {
@@ -255,7 +265,10 @@ async function executeRun(ctx, opts) {
   });
 
   try {
-    const fn = agent === 'cursor' ? runCursor : agent === 'codex' ? runCodex : runClaude;
+    const fn = agent === 'cursor' ? runCursor
+             : agent === 'codex' ? runCodex
+             : agent === 'opencode' ? runOpenCode
+             : runClaude;
     const { text, sessionId: newId } = await fn({
       prompt,
       cwd,
@@ -454,7 +467,7 @@ async function handleCommand(ctx, command, arg) {
         const p = projects.get(s.projectId);
         cleared.push(`project **${p?.name || s.projectId}**`);
       }
-      if (sessions.resetFreeform(ctx.chatId)) cleared.push('Q&A (/claude /cursor /codex)');
+      if (sessions.resetFreeform(ctx.chatId)) cleared.push('Q&A (/claude /cursor /codex /opencode)');
       if (!cleared.length) return ctx.sendText('Nothing to reset.');
       return ctx.sendMarkdown('🔄 Cleared: ' + cleared.join(', '));
     }
@@ -479,6 +492,11 @@ async function handleCommand(ctx, command, arg) {
     case 'codex': {
       if (!arg) return ctx.sendText('Usage: /codex <prompt>');
       return handleFreeform(ctx, arg, 'codex');
+    }
+
+    case 'opencode': {
+      if (!arg) return ctx.sendText('Usage: /opencode <prompt>');
+      return handleFreeform(ctx, arg, 'opencode');
     }
 
     default:
@@ -574,6 +592,7 @@ async function handleCallbackAction(ctx, action) {
     if (scope === 'fcl') sessions.setFreeformModel(ctx.chatId, 'claude', modelId);
     else if (scope === 'fcu') sessions.setFreeformModel(ctx.chatId, 'cursor', modelId);
     else if (scope === 'fco') sessions.setFreeformModel(ctx.chatId, 'codex', modelId);
+    else if (scope === 'foc') sessions.setFreeformModel(ctx.chatId, 'opencode', modelId);
     else if (scope === 'proj') {
       const s = sessions.get(ctx.chatId);
       if (!s.projectId) { await ctx.acknowledgeAction('No active project'); return; }
@@ -601,6 +620,7 @@ const COMMANDS = [
   { command: 'claude', description: 'Ask Claude (no project needed): /claude <prompt>' },
   { command: 'cursor', description: 'Ask Cursor (no project needed): /cursor <prompt>' },
   { command: 'codex', description: 'Ask Codex (no project needed): /codex <prompt>' },
+  { command: 'opencode', description: 'Ask OpenCode (no project needed): /opencode <prompt>' },
   { command: 'cancel', description: 'Abort the running agent' },
   { command: 'dashboard', description: 'Open the web dashboard' },
   { command: 'help', description: 'Show help' },

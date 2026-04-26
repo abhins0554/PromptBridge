@@ -138,7 +138,7 @@ function createBot() {
     });
 
     try {
-      if (cmd.command === 'claude' || cmd.command === 'cursor' || cmd.command === 'codex') {
+      if (cmd.command === 'claude' || cmd.command === 'cursor' || cmd.command === 'codex' || cmd.command === 'opencode') {
         // Treat as /claude, /cursor, or /codex command with the argument
         await handleCommand(ctx, cmd.command, cmd.arg);
       } else {

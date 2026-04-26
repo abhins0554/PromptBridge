@@ -219,7 +219,7 @@
     let modelCache = null;
     async function ensureModelCache() {
       if (modelCache) return modelCache;
-      try { modelCache = await api('/api/models'); } catch { modelCache = { claude: [], cursor: [], codex: [] }; }
+      try { modelCache = await api('/api/models'); } catch { modelCache = { claude: [], cursor: [], codex: [], opencode: [] }; }
       return modelCache;
     }
     async function populateModelPresets() {
@@ -371,6 +371,7 @@
         $('#s-claudeCmd').value = s.claudeCmd || '';
         $('#s-cursorCmd').value = s.cursorCmd || '';
         $('#s-codexCmd').value = s.codexCmd || '';
+        $('#s-opencodeCmd').value = s.opencodeCmd || '';
         $('#s-permissionMode').value = s.permissionMode || 'bypassPermissions';
         $('#s-agentTimeoutMs').value = s.agentTimeoutMs ? Math.round(s.agentTimeoutMs / 60000) : 60;
         $('#s-freeformCwd').value = s.freeformCwd || '';
@@ -436,6 +437,7 @@
         claudeCmd: $('#s-claudeCmd').value.trim() || 'claude',
         cursorCmd: $('#s-cursorCmd').value.trim() || 'cursor-agent',
         codexCmd: $('#s-codexCmd').value.trim() || 'codex',
+        opencodeCmd: $('#s-opencodeCmd').value.trim() || 'opencode',
         permissionMode: $('#s-permissionMode').value,
         agentTimeoutMs: timeoutMin > 0 ? Math.round(timeoutMin * 60000) : 3600000,
         freeformCwd: $('#s-freeformCwd').value.trim(),

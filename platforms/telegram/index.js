@@ -72,6 +72,9 @@ function createBot() {
   bot.command('codex', (ctx) =>
     handleCommand(wrap(ctx), 'codex', stripCommand(ctx.message.text, 'codex')),
   );
+  bot.command('opencode', (ctx) =>
+    handleCommand(wrap(ctx), 'opencode', stripCommand(ctx.message.text, 'opencode')),
+  );
 
   // ── Plain text ──────────────────────────────────────────────────────────────
   bot.on('text', (ctx) => {
@@ -91,9 +94,11 @@ function createBot() {
       const claudeMatch = caption.match(/^\/claude(@\w+)?(?:\s+([\s\S]*))?$/);
       const cursorMatch = caption.match(/^\/cursor(@\w+)?(?:\s+([\s\S]*))?$/);
       const codexMatch = caption.match(/^\/codex(@\w+)?(?:\s+([\s\S]*))?$/);
+      const opencodeMatch = caption.match(/^\/opencode(@\w+)?(?:\s+([\s\S]*))?$/);
       if (claudeMatch) { agentOverride = 'claude'; userPrompt = (claudeMatch[2] || '').trim(); }
       else if (cursorMatch) { agentOverride = 'cursor'; userPrompt = (cursorMatch[2] || '').trim(); }
       else if (codexMatch) { agentOverride = 'codex'; userPrompt = (codexMatch[2] || '').trim(); }
+      else if (opencodeMatch) { agentOverride = 'opencode'; userPrompt = (opencodeMatch[2] || '').trim(); }
       if (!userPrompt) userPrompt = 'Analyze the attached file(s) and summarize the contents.';
 
       const attachments = extractAttachments(ctx.message);
@@ -104,7 +109,7 @@ function createBot() {
       const cwdResult = getAttachmentCwd(chatId, agentOverride);
       if (cwdResult.error === 'no-project') {
         return ctx.reply(
-          'Attach a file with caption /claude …, /cursor …, or /codex …, or /use an active project first.',
+          'Attach a file with caption /claude …, /cursor …, /codex …, or /opencode …, or /use an active project first.',
         );
       }
       if (cwdResult.error === 'project-missing') {
