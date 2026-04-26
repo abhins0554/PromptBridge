@@ -44,7 +44,6 @@
   "build": {
     "appId": "com.promptbridge.app",
     "productName": "PromptBridge",
-    "publish": "never",
     "asar": false,
     "directories": {
       "output": "dist",
