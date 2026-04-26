@@ -1,6 +1,6 @@
 {
   "name": "promptbridge",
-  "version": "2.0.0",
+  "version": "2.1.5",
   "description": "PromptBridge — multi-platform AI agent orchestrator. Drive Claude Code / Cursor agents from Telegram, Email, and more, with a web dashboard for configuration.",
   "author": "Abhishek",
   "main": "electron/main.js",
