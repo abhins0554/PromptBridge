@@ -31,10 +31,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Windows artifact
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
           name: PromptBridge-windows
           path: dist/*.exe
+          retention-days: 1
 
   build-macos:
     name: Build macOS
@@ -56,10 +58,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload macOS artifact
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
           name: PromptBridge-macos
           path: dist/*.dmg
+          retention-days: 1
 
   build-linux:
     name: Build Linux
@@ -81,10 +85,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Linux artifact
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
           name: PromptBridge-linux
           path: dist/*.AppImage
+          retention-days: 1
 
   create-release:
     name: Create Release
