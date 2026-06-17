@@ -481,21 +481,29 @@ async function handleCommand(ctx, command, arg) {
 
     case 'claude': {
       if (!arg) return ctx.sendText('Usage: /claude <prompt>');
+      const s_cl = sessions.get(ctx.chatId);
+      if (s_cl?.projectId && projects.get(s_cl.projectId)) return handleProjectPrompt(ctx, arg, 'claude');
       return handleFreeform(ctx, arg, 'claude');
     }
 
     case 'cursor': {
       if (!arg) return ctx.sendText('Usage: /cursor <prompt>');
+      const s_cu = sessions.get(ctx.chatId);
+      if (s_cu?.projectId && projects.get(s_cu.projectId)) return handleProjectPrompt(ctx, arg, 'cursor');
       return handleFreeform(ctx, arg, 'cursor');
     }
 
     case 'codex': {
       if (!arg) return ctx.sendText('Usage: /codex <prompt>');
+      const s_co = sessions.get(ctx.chatId);
+      if (s_co?.projectId && projects.get(s_co.projectId)) return handleProjectPrompt(ctx, arg, 'codex');
       return handleFreeform(ctx, arg, 'codex');
     }
 
     case 'opencode': {
       if (!arg) return ctx.sendText('Usage: /opencode <prompt>');
+      const s_oc = sessions.get(ctx.chatId);
+      if (s_oc?.projectId && projects.get(s_oc.projectId)) return handleProjectPrompt(ctx, arg, 'opencode');
       return handleFreeform(ctx, arg, 'opencode');
     }
 
